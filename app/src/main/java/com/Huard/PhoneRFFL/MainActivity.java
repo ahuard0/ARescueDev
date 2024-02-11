@@ -1,20 +1,12 @@
 package com.Huard.PhoneRFFL;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
 import android.media.ImageReader;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Pair;
@@ -28,6 +20,12 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -36,24 +34,24 @@ public class MainActivity extends AppCompatActivity implements ImageReader.OnIma
 
     /** Bitmap variables */
     private ImageView imageView;
-    int screenWidth = 2280;
-    int screenHeight = 1080;
-    Bitmap bitmap = Bitmap.createBitmap(screenWidth, screenHeight, Bitmap.Config.ARGB_8888);
+    final int screenWidth = 2280;
+    final int screenHeight = 1080;
+    final Bitmap bitmap = Bitmap.createBitmap(screenWidth, screenHeight, Bitmap.Config.ARGB_8888);
 
     /** ValueMatrix and ColoredSquares variables */
-    int[] jets = new int[14]; // colors for the JET heatmap
-    int[][] valueMatrix = new int[1080][2280]; // matrix of numerical values for pixel colors
-    int lifetime = 2500; // display duration of data points (in ms)
-    int interval = 35; // interval between incoming data points (in ms) -FOR AUTOGEN-
-    int range = 40; // half of a data point square side length
+    final int[] jets = new int[14]; // colors for the JET heatmap
+    final int[][] valueMatrix = new int[1080][2280]; // matrix of numerical values for pixel colors
+    final int lifetime = 2500; // display duration of data points (in ms)
+    final int interval = 35; // interval between incoming data points (in ms) -FOR AUTOGEN-
+    final int range = 40; // half of a data point square side length
     int x; // x pixel coordinate
     int y; // y pixel coordinate
-    double[][] degrees = new double[288][2]; // fake data storage (azimuth, elevation) -FOR AUTOGEN-
-    ArrayList<Pair<Double, Double>> centroidList = new ArrayList(); // list of <El, Az> for centroid calculation
-    int centroidHistoryCutoff = 200; // number of stored points for centroid calculation
-    double[] avgCentroid = new double[2]; // store the centroid based on recent history
-    float fx = (float) screenWidth; // for matrix transformation
-    float fy = (float) -screenHeight; // for matrix transformation
+    final double[][] degrees = new double[288][2]; // fake data storage (azimuth, elevation) -FOR AUTOGEN-
+    final ArrayList<Pair<Double, Double>> centroidList = new ArrayList<>(); // list of <El, Az> for centroid calculation
+    final int centroidHistoryCutoff = 200; // number of stored points for centroid calculation
+    final double[] avgCentroid = new double[2]; // store the centroid based on recent history
+    final float fx = (float) screenWidth; // for matrix transformation
+    final float fy = (float) -screenHeight; // for matrix transformation
 
 //    double f = 19285.7; // suggested value of f (can't test on mock data, too zoomed in)
 
@@ -68,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements ImageReader.OnIma
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        /** Initialize arrays */
+        // Initialize arrays
         String[] jetColors = "0x00000000, 0x60000088, 0x600000ff, 0x600088ff, 0x6000ffff, 0x6088ff88, 0x60ffff00, 0x60ff8800, 0x60ff0000, 0x60880000, 0x60880000, 0x60880000, 0x60880000, 0x60880000".split(", ");
         for (int i = 0; i < jets.length; i++) {
             jets[i] = Integer.decode(jetColors[i]);
@@ -103,8 +101,8 @@ public class MainActivity extends AppCompatActivity implements ImageReader.OnIma
         setContentView(R.layout.activity_main);
 
         // Find timer objects
-        timerText = (TextView) findViewById(R.id.timerText);
-        stopStartButton = (Button) findViewById(R.id.startStopButton);
+        timerText = findViewById(R.id.timerText);
+        stopStartButton = findViewById(R.id.startStopButton);
         timer = new Timer();
 
         // Asks for camera permissions
@@ -121,60 +119,45 @@ public class MainActivity extends AppCompatActivity implements ImageReader.OnIma
 
         colorReset(); // initial bitmap coloring (transparent and almost invisible)
 
-        /** Centroid call button */
-        Button centroidButton = (Button) findViewById(R.id.centroid);
-        centroidButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                centroidButton();
-            }
-        });
+        // Centroid call button
+        Button centroidButton = findViewById(R.id.centroid);
+        centroidButton.setOnClickListener(v -> centroidButton());
 
-        /** Haptics enable/disable button */
-        Switch hapticButton = (Switch) findViewById(R.id.haptics);
-        hapticButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                hapticSwitch();
-            }
-        });
+        // Haptics enable/disable button
+        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch hapticButton = findViewById(R.id.haptics);
+        hapticButton.setOnClickListener(v -> hapticSwitch());
 
-        /** Heatmap enable/disable button */
-        Switch heatmapButton = (Switch) findViewById(R.id.heatmap);
-        heatmapButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                heatmapSwitch();
-            }
-        });
+        // Heatmap enable/disable button
+        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch heatmapButton = findViewById(R.id.heatmap);
+        heatmapButton.setOnClickListener(v -> heatmapSwitch());
 
-        /** Automatically generates data on a separate thread (-AUTOGEN-) */
-        Runnable loop = new Runnable() {
-            @Override
-            public void run() {
-                Looper.prepare();
-                for (int i = 0; i < 9999; i ++) {
-                    if (i > degrees.length - 1) {
-                        i = 0;
+        // Automatically generates data on a separate thread (-AUTOGEN-)
+        Runnable loop = () -> {
+            Looper.prepare();
+            for (int i = 0; i < 9999; i ++) {
+                if (i > degrees.length - 1) {
+                    i = 0;
+                }
+                x = ((int) (fx * Math.tan(Math.PI * degrees[i][0] / 180))) + screenWidth / 2;
+                y = ((int) (fy * Math.tan(Math.PI * degrees[i][1] / 180))) + screenHeight / 2;
+
+                // centroid history update
+                centroidList.add(new Pair<>(degrees[i][0], degrees[i][1]));
+                if (centroidList.size() > centroidHistoryCutoff) {
+                    for (int j = 0; j < centroidList.size(); j++) {
+                        avgCentroid[0] += centroidList.get(j).first;
+                        avgCentroid[1] += centroidList.get(j).second;
                     }
-                    x = ((int) (fx * Math.tan(Math.PI * degrees[i][0] / 180))) + screenWidth / 2;
-                    y = ((int) (fy * Math.tan(Math.PI * degrees[i][1] / 180))) + screenHeight / 2;
+                    avgCentroid[0] /= centroidList.size();
+                    avgCentroid[1] /= centroidList.size();
+                    centroidList.clear();
+                }
 
-                    // centroid history update
-                    centroidList.add(new Pair(degrees[i][0], degrees[i][1]));
-                    if (centroidList.size() > centroidHistoryCutoff) {
-                        for (int j = 0; j < centroidList.size(); j++) {
-                            avgCentroid[0] += centroidList.get(j).first;
-                            avgCentroid[1] += centroidList.get(j).second;
-                        }
-                        avgCentroid[0] /= centroidList.size();
-                        avgCentroid[1] /= centroidList.size();
-                        centroidList.clear();
-                    }
-
-                    squarePlot(x, y);
-                    try {
-                        Thread.sleep(interval);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+                squarePlot(x, y);
+                try {
+                    Thread.sleep(interval);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             }
         };
@@ -208,6 +191,9 @@ public class MainActivity extends AppCompatActivity implements ImageReader.OnIma
             toast.show();
         }
     }
+    public void centroidButton(View view) {
+        centroidButton();
+    }
 
     /** Enable/disable haptics */
     public void hapticSwitch() {
@@ -215,6 +201,9 @@ public class MainActivity extends AppCompatActivity implements ImageReader.OnIma
         int duration = Toast.LENGTH_SHORT;
         Toast toast = Toast.makeText(this /* MyActivity */, text, duration);
         toast.show();
+    }
+    public void hapticSwitch(View view) {
+        hapticSwitch();
     }
 
     /** Enable/disable heatmap */
@@ -224,6 +213,9 @@ public class MainActivity extends AppCompatActivity implements ImageReader.OnIma
         } else {
             imageView.setImageAlpha(0);
         }
+    }
+    public void heatmapSwitch(View view) {
+        heatmapSwitch();
     }
 
     /** Camera permission request */
@@ -239,10 +231,7 @@ public class MainActivity extends AppCompatActivity implements ImageReader.OnIma
         }
     }
 
-    int previewHeight = 0, previewWidth = 0;
-
     /** Creates camera fragment showing live footage */
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     protected void setFragment() {
         final CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         String cameraId = null;
@@ -254,13 +243,7 @@ public class MainActivity extends AppCompatActivity implements ImageReader.OnIma
         CameraConnectionFragment fragment;
         CameraConnectionFragment camera2Fragment =
                 CameraConnectionFragment.newInstance(
-                        new CameraConnectionFragment.ConnectionCallback() {
-                            @Override
-                            public void onPreviewSizeChosen(final Size size, final int rotation) {
-                                previewHeight = size.getHeight();
-                                previewWidth = size.getWidth();
-                            }
-                        },
+                        (size, rotation) -> {},
                         this,
                         R.layout.camera_fragment,
                         new Size(screenWidth, screenHeight));
@@ -304,7 +287,7 @@ public class MainActivity extends AppCompatActivity implements ImageReader.OnIma
                 synchronized(this) {
                     try {
                         wait(lifetime);
-                    } catch (InterruptedException e) { }
+                    } catch (InterruptedException ignored) { }
                 }
                 for (int i = left; i < right; i++) {
                     for (int j = up; j < bot; j++) {
@@ -324,31 +307,25 @@ public class MainActivity extends AppCompatActivity implements ImageReader.OnIma
         AlertDialog.Builder resetAlert = new AlertDialog.Builder(this);
         resetAlert.setTitle("Reset Timer");
         resetAlert.setMessage("Are you sure you want to reset the timer?");
-        resetAlert.setPositiveButton("Reset", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                if (timerTask != null) {
-                    timerTask.cancel();
-                    setButtonUI("START", R.color.green);
-                    time = 0.0;
-                    timerStarted = false;
-                    timerText.setText(formatTime(0,0,0));
-                }
+        resetAlert.setPositiveButton("Reset", (dialogInterface, i) -> {
+            if (timerTask != null) {
+                timerTask.cancel();
+                setButtonUI("START", R.color.green);
+                time = 0.0;
+                timerStarted = false;
+                timerText.setText(formatTime(0,0,0));
             }
         });
 
-        resetAlert.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                // do nothing
-            }
+        resetAlert.setNeutralButton("Cancel", (dialogInterface, i) -> {
+            // do nothing
         });
 
         resetAlert.show();
     }
 
     public void startStopTapped(View view) {
-        if (timerStarted == false) {
+        if (!timerStarted) {
             timerStarted = true;
             setButtonUI("STOP", R.color.red);
 
@@ -370,12 +347,9 @@ public class MainActivity extends AppCompatActivity implements ImageReader.OnIma
         timerTask = new TimerTask() {
             @Override
             public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        time++;
-                        timerText.setText(getTimerText());
-                    }
+                runOnUiThread(() -> {
+                    time++;
+                    timerText.setText(getTimerText());
                 });
             }
         };
@@ -392,12 +366,13 @@ public class MainActivity extends AppCompatActivity implements ImageReader.OnIma
         return formatTime(seconds, minutes, hours);
     }
 
+    @SuppressLint("DefaultLocale")
     private String formatTime(int seconds, int minutes, int hours) {
         return String.format("%02d", hours) + " : " + String.format("%02d", minutes) + " : " + String.format("%02d", seconds);
     }
 }
 
-/** Quick access debugging tools */
+// Quick access debugging tools
 // Toasting on screen
 //        CharSequence text = "color" + bitmap.getPixel(x, y);
 //        int duration = Toast.LENGTH_SHORT;
@@ -407,5 +382,5 @@ public class MainActivity extends AppCompatActivity implements ImageReader.OnIma
 // Logging in terminal
 //        Log.d("tag", "msg");
 
-/** The tutorial for the timer */
+// The tutorial for the timer
 // https://www.youtube.com/watch?v=7QVr5SgpVog&ab_channel=CodeWithCal

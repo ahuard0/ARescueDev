@@ -3,4 +3,9 @@
     <string name="centroid">Centroid</string>
     <string name="haptics">Haptics</string>
     <string name="heatmap">Heatmap</string>
+    <string name="image_view">Image View</string>
+    <string name="png_item">PNG Item</string>
+    <string name="start">START</string>
+    <string name="StartTime">00:00:00</string>
+    <string name="reset">RESET</string>
 </resources>

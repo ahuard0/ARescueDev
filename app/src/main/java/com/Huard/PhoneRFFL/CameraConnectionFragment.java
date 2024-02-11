@@ -8,7 +8,6 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.ImageFormat;
@@ -26,7 +25,6 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.ImageReader;
 import android.media.ImageReader.OnImageAvailableListener;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -39,7 +37,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.annotation.RequiresApi;
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import java.util.ArrayList;
@@ -57,7 +55,6 @@ import java.util.concurrent.TimeUnit;
  * <p>Instantiated by newInstance.</p>
  */
 @SuppressLint("ValidFragment")
-@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 @SuppressWarnings("FragmentNotInstantiable")
 public class CameraConnectionFragment extends Fragment {
 
@@ -94,16 +91,16 @@ public class CameraConnectionFragment extends Fragment {
             new CameraCaptureSession.CaptureCallback() {
                 @Override
                 public void onCaptureProgressed(
-                        final CameraCaptureSession session,
-                        final CaptureRequest request,
-                        final CaptureResult partialResult) {
+                        @NonNull final CameraCaptureSession session,
+                        @NonNull final CaptureRequest request,
+                        @NonNull final CaptureResult partialResult) {
                 }
 
                 @Override
                 public void onCaptureCompleted(
-                        final CameraCaptureSession session,
-                        final CaptureRequest request,
-                        final TotalCaptureResult result) {
+                        @NonNull final CameraCaptureSession session,
+                        @NonNull final CaptureRequest request,
+                        @NonNull final TotalCaptureResult result) {
                 }
             };
 
@@ -119,23 +116,23 @@ public class CameraConnectionFragment extends Fragment {
             new TextureView.SurfaceTextureListener() {
                 @Override
                 public void onSurfaceTextureAvailable(
-                        final SurfaceTexture texture, final int width, final int height) {
+                        @NonNull final SurfaceTexture texture, final int width, final int height) {
                     openCamera(width, height);
                 }
 
                 @Override
                 public void onSurfaceTextureSizeChanged(
-                        final SurfaceTexture texture, final int width, final int height) {
+                        @NonNull final SurfaceTexture texture, final int width, final int height) {
                     configureTransform(width, height);
                 }
 
                 @Override
-                public boolean onSurfaceTextureDestroyed(final SurfaceTexture texture) {
+                public boolean onSurfaceTextureDestroyed(@NonNull final SurfaceTexture texture) {
                     return true;
                 }
 
                 @Override
-                public void onSurfaceTextureUpdated(final SurfaceTexture texture) {
+                public void onSurfaceTextureUpdated(@NonNull final SurfaceTexture texture) {
                 }
             };
     private ImageReader previewReader;
@@ -144,7 +141,7 @@ public class CameraConnectionFragment extends Fragment {
     private final CameraDevice.StateCallback stateCallback =
             new CameraDevice.StateCallback() {
                 @Override
-                public void onOpened(final CameraDevice cd) {
+                public void onOpened(@NonNull final CameraDevice cd) {
                     // This method is called when the camera is opened.  We start camera preview here.
                     cameraOpenCloseLock.release();
                     cameraDevice = cd;
@@ -197,8 +194,8 @@ public class CameraConnectionFragment extends Fragment {
 
         // Collect the supported resolutions that are at least as big as the preview Surface
         boolean exactSizeFound = false;
-        final List<Size> bigEnough = new ArrayList<Size>();
-        final List<Size> tooSmall = new ArrayList<Size>();
+        final List<Size> bigEnough = new ArrayList<>();
+        final List<Size> tooSmall = new ArrayList<>();
         for (final Size option : choices) {
             if (option.equals(desiredSize)) {
                 // Set the size but don't return yet so that remaining sizes will still be logged.
@@ -218,9 +215,8 @@ public class CameraConnectionFragment extends Fragment {
 
         // Pick the smallest of those, assuming we found any
         if (bigEnough.size() > 0) {
-            final Size chosenSize = Collections.min(bigEnough, new CompareSizesByArea());
             // LOGGER.i("Chosen size: " + chosenSize.getWidth() + "x" + chosenSize.getHeight());
-            return chosenSize;
+            return Collections.min(bigEnough, new CompareSizesByArea());
         } else {
             // LOGGER.e("Couldn't find any suitable preview size");
             return choices[0];
@@ -237,19 +233,12 @@ public class CameraConnectionFragment extends Fragment {
 
     /**
      * Shows a {@link Toast} on the UI thread.
-     *
-     * @param text The message to show
      */
-    private void showToast(final String text) {
+    private void showToast() {
         final Activity activity = getActivity();
         if (activity != null) {
             activity.runOnUiThread(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(activity, text, Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    () -> Toast.makeText(activity, "Failed", Toast.LENGTH_SHORT).show());
         }
     }
 
@@ -261,7 +250,7 @@ public class CameraConnectionFragment extends Fragment {
 
     @Override
     public void onViewCreated(final View view, final Bundle savedInstanceState) {
-        textureView = (AutoFitTextureView) view.findViewById(R.id.texture);
+        textureView = view.findViewById(R.id.texture);
     }
 
     @Override
@@ -297,7 +286,6 @@ public class CameraConnectionFragment extends Fragment {
     }
 
     /** Sets up member variables related to camera. */
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void setUpCameraOutputs() {
         final Activity activity = getActivity();
         final CameraManager manager = (CameraManager) activity.getSystemService(Context.CAMERA_SERVICE);
@@ -314,7 +302,7 @@ public class CameraConnectionFragment extends Fragment {
             // garbage capture data.
             previewSize =
                     chooseOptimalSize(
-                            map.getOutputSizes(SurfaceTexture.class),
+                            map != null ? map.getOutputSizes(SurfaceTexture.class) : new Size[0],
                             inputSize.getWidth(),
                             inputSize.getHeight());
 
@@ -398,23 +386,19 @@ public class CameraConnectionFragment extends Fragment {
     }
 
     /** Stops the background thread and its {@link Handler}. */
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     private void stopBackgroundThread() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            backgroundThread.quitSafely();
+        backgroundThread.quitSafely();
 
-            try {
-                backgroundThread.join();
-                backgroundThread = null;
-                backgroundHandler = null;
-            } catch (final InterruptedException e) {
-                //    LOGGER.e(e, "Exception!");
-            }
+        try {
+            backgroundThread.join();
+            backgroundThread = null;
+            backgroundHandler = null;
+        } catch (final InterruptedException e) {
+            //    LOGGER.e(e, "Exception!");
         }
     }
 
     /** Creates a new {@link CameraCaptureSession} for camera preview. */
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void createCameraPreviewSession() {
         try {
             final SurfaceTexture texture = textureView.getSurfaceTexture();
@@ -446,7 +430,7 @@ public class CameraConnectionFragment extends Fragment {
                     new CameraCaptureSession.StateCallback() {
 
                         @Override
-                        public void onConfigured(final CameraCaptureSession cameraCaptureSession) {
+                        public void onConfigured(@NonNull final CameraCaptureSession cameraCaptureSession) {
                             // The camera is already closed
                             if (null == cameraDevice) {
                                 return;
@@ -473,8 +457,8 @@ public class CameraConnectionFragment extends Fragment {
                         }
 
                         @Override
-                        public void onConfigureFailed(final CameraCaptureSession cameraCaptureSession) {
-                            showToast("Failed");
+                        public void onConfigureFailed(@NonNull final CameraCaptureSession cameraCaptureSession) {
+                            showToast();
                         }
                     },
                     null);
@@ -554,12 +538,7 @@ public class CameraConnectionFragment extends Fragment {
                     .setMessage(getArguments().getString(ARG_MESSAGE))
                     .setPositiveButton(
                             android.R.string.ok,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(final DialogInterface dialogInterface, final int i) {
-                                    activity.finish();
-                                }
-                            })
+                            (dialogInterface, i) -> activity.finish())
                     .create();
         }
     }

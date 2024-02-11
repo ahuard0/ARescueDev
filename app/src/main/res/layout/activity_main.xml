@@ -14,7 +14,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"></FrameLayout>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.Toolbar
         android:layout_width="match_parent"
@@ -25,7 +25,7 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="RESET"
+            android:text="@string/reset"
             android:background="@color/gray"
             android:textColor="@color/red"
             android:textSize="30sp"
@@ -34,7 +34,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="00:00:00"
+            android:text="@string/StartTime"
             android:id="@+id/timerText"
             android:textColor="@color/black"
             android:layout_gravity="center"
@@ -43,12 +43,12 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="START"
+            android:text="@string/start"
             android:id="@+id/startStopButton"
             android:background="@color/gray"
             android:textColor="@color/green"
             android:layout_gravity="end"
-            android:layout_marginRight="15dp"
+            android:layout_marginEnd="15dp"
             android:textSize="30sp"
             android:onClick="startStopTapped"/>
 
@@ -59,6 +59,7 @@
         android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:contentDescription="@string/image_view"
         app:layout_constraintEnd_toEndOf="parent"
         tools:layout_editor_absoluteY="-136dp" />
 
@@ -68,7 +69,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="4dp"
         android:layout_marginBottom="80dp"
-        android:onClick="centroidSwitch"
+        android:onClick="centroidButton"
         android:text="@string/centroid"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -79,6 +80,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="4dp"
         android:layout_marginBottom="48dp"
+        android:minHeight="48dp"
         android:onClick="hapticSwitch"
         android:text="@string/haptics"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -92,6 +94,7 @@
         android:layout_marginEnd="4dp"
         android:layout_marginBottom="16dp"
         android:checked="true"
+        android:minHeight="48dp"
         android:onClick="heatmapSwitch"
         android:text="@string/heatmap"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -101,8 +104,9 @@
     <ImageView
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:layout_marginStart="1099px"
-        android:layout_marginTop="499px"
+        android:layout_marginStart="1099dp"
+        android:layout_marginTop="499dp"
+        android:contentDescription="@string/png_item"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/pngitem_797167" />
