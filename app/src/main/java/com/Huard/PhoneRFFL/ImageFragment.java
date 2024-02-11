@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.os.Looper;
 import android.util.Pair;
@@ -43,6 +44,7 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
 
 //    double f = 19285.7; // suggested value of f (can't test on mock data, too zoomed in)
 
+    private SolutionViewModel solutionViewModel;
 
     public ImageFragment() {
         initializeArrays();
@@ -69,7 +71,20 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
         imageView = view.findViewById(R.id.imageView);
         imageView.setImageBitmap(bitmap);
 
+        SideViewModel sideViewModel = new ViewModelProvider(requireActivity()).get(SideViewModel.class);
+        sideViewModel.getHeatMapSelected().observe(getViewLifecycleOwner(), this::updateHeatMap);
+
+        solutionViewModel = new ViewModelProvider(requireActivity()).get(SolutionViewModel.class);
+
         BeginLoopSyntheticData();
+    }
+
+    private void updateHeatMap(boolean isHeatMapSelected) {
+        if (isHeatMapSelected) {
+            imageView.setImageAlpha(255);
+        } else {
+            imageView.setImageAlpha(0);
+        }
     }
 
     @Override
@@ -214,6 +229,11 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
                     }
                     avgCentroid[0] /= centroidList.size();
                     avgCentroid[1] /= centroidList.size();
+
+                    // Send centroid to Solution Fragment
+                    solutionViewModel.setAzimuth(avgCentroid[0]);
+                    solutionViewModel.setElevation(avgCentroid[1]);
+
                     centroidList.clear();
                 }
 
