@@ -1,4 +1,4 @@
-package com.example.livefeed;
+package com.Huard.PhoneRFFL;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -339,7 +339,6 @@ public class CameraConnectionFragment extends Fragment {
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @SuppressLint("MissingPermission")
     private void openCamera(final int width, final int height) {
         setUpCameraOutputs();

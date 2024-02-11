@@ -1,4 +1,4 @@
-package com.example.livefeed;
+package com.Huard.PhoneRFFL;
 
 import android.content.Context;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.example.livefeed", appContext.getPackageName());
+        assertEquals("com.Huard.PhoneRFFL", appContext.getPackageName());
     }
 }

@@ -1,4 +1,4 @@
-package com.example.livefeed;
+package com.Huard.PhoneRFFL;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -89,9 +89,9 @@ public class MainActivity extends AppCompatActivity implements ImageReader.OnIma
             double dbm4 = (ADC4 - 1121) / 16.014;
             double dbm12diff = dbm2 - dbm1;
             double dbm34diff = dbm3 - dbm4;
-            Double AOAResultVert = dbm12diff / (-0.1462); // dbm12diff = -0.1462 * AOAResult + 0.0000
-            Double AOAResultHori = dbm34diff / (-0.1462); // dbm34diff = -0.1462 * AOAResult + 0.0000
-            degrees[i][0] = AOAResultHori;
+            double AOAResultVert = dbm12diff / (-0.1462); // dbm12diff = -0.1462 * AOAResult + 0.0000
+            double AOAResultHorizontal = dbm34diff / (-0.1462); // dbm34diff = -0.1462 * AOAResult + 0.0000
+            degrees[i][0] = AOAResultHorizontal;
             degrees[i][1] = AOAResultVert;
         }
 
@@ -102,20 +102,15 @@ public class MainActivity extends AppCompatActivity implements ImageReader.OnIma
 
         setContentView(R.layout.activity_main);
 
-        /** Find timer objects */
+        // Find timer objects
         timerText = (TextView) findViewById(R.id.timerText);
         stopStartButton = (Button) findViewById(R.id.startStopButton);
         timer = new Timer();
 
-        /** Asks for camera permissions */
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
-                ActivityCompat.requestPermissions(this, new String[]{
-                        android.Manifest.permission.CAMERA}, 121);
-            } else {
-                // show live camera footage
-                setFragment();
-            }
+        // Asks for camera permissions
+        if (checkSelfPermission(android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this, new String[]{
+                    android.Manifest.permission.CAMERA}, 121);
         } else {
             // show live camera footage
             setFragment();
