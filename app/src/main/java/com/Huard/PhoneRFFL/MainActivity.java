@@ -34,13 +34,13 @@ public class MainActivity extends AppCompatActivity implements ImageReader.OnIma
 
     /** Bitmap variables */
     private ImageView imageView;
-    final int screenWidth = 2280;
+    final int screenWidth = 2400;
     final int screenHeight = 1080;
     final Bitmap bitmap = Bitmap.createBitmap(screenWidth, screenHeight, Bitmap.Config.ARGB_8888);
 
     /** ValueMatrix and ColoredSquares variables */
     final int[] jets = new int[14]; // colors for the JET heatmap
-    final int[][] valueMatrix = new int[1080][2280]; // matrix of numerical values for pixel colors
+    final int[][] valueMatrix = new int[1080][2400]; // matrix of numerical values for pixel colors
     final int lifetime = 2500; // display duration of data points (in ms)
     final int interval = 35; // interval between incoming data points (in ms) -FOR AUTOGEN-
     final int range = 40; // half of a data point square side length
