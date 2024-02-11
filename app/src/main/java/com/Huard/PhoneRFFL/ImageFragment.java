@@ -14,6 +14,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.os.Handler;
 import android.os.Looper;
 import android.util.Pair;
 import android.util.Size;
@@ -23,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class ImageFragment extends Fragment implements ImageReader.OnImageAvailableListener {
     public ImageView imageView;
@@ -36,7 +38,7 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
     int x; // x pixel coordinate
     int y; // y pixel coordinate
     final double[][] degrees = new double[288][2]; // fake data storage (azimuth, elevation) -FOR AUTOGEN-
-    final ArrayList<Pair<Double, Double>> centroidList = new ArrayList<>(); // list of <El, Az> for centroid calculation
+    final LinkedList<Pair<Double, Double>> pairQueue = new LinkedList<>(); // list of <El, Az> for centroid calculation
     final int centroidHistoryCutoff = 200; // number of stored points for centroid calculation
     public final double[] avgCentroid = new double[2]; // store the centroid based on recent history
     final float fx = (float) MainActivity.screenWidth; // for matrix transformation
@@ -221,20 +223,23 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
                 y = ((int) (fy * Math.tan(Math.PI * degrees[i][1] / 180))) + MainActivity.screenHeight / 2;
 
                 // centroid history update
-                centroidList.add(new Pair<>(degrees[i][0], degrees[i][1]));
-                if (centroidList.size() > centroidHistoryCutoff) {
-                    for (int j = 0; j < centroidList.size(); j++) {
-                        avgCentroid[0] += centroidList.get(j).first;
-                        avgCentroid[1] += centroidList.get(j).second;
+                pairQueue.add(new Pair<>(degrees[i][0], degrees[i][1]));
+                if (pairQueue.size() >= centroidHistoryCutoff) {
+                    for (int j = 0; j < pairQueue.size(); j++) {
+                        avgCentroid[0] += pairQueue.get(j).first;
+                        avgCentroid[1] += pairQueue.get(j).second;
                     }
-                    avgCentroid[0] /= centroidList.size();
-                    avgCentroid[1] /= centroidList.size();
+                    avgCentroid[0] /= pairQueue.size();
+                    avgCentroid[1] /= pairQueue.size();
 
                     // Send centroid to Solution Fragment
-                    solutionViewModel.setAzimuth(avgCentroid[0]);
-                    solutionViewModel.setElevation(avgCentroid[1]);
+                    Handler handler = new Handler(Looper.getMainLooper());  // Post updates to LiveData on the main thread
+                    handler.post(() -> {
+                        solutionViewModel.setAzimuth(avgCentroid[0]);
+                        solutionViewModel.setElevation(avgCentroid[1]);
+                    });
 
-                    centroidList.clear();
+                    pairQueue.poll();
                 }
 
                 squarePlot(x, y);

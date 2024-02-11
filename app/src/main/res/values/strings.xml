@@ -8,9 +8,7 @@
     <string name="start">START</string>
     <string name="StartTime">00:00:00</string>
     <string name="reset">RESET</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="show_centroid">Centroid</string>
-    <string name="AOA_Azi">XX.X\u00B0<sup><small>Az</small></sup></string>
-    <string name="AOA_El">YY.Y\u00B0<sup><small>El</small></sup></string>
+    <string name="AOA_Azi">Init</string>
+    <string name="AOA_El">Please Wait</string>
 </resources>
