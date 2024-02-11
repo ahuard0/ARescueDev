@@ -16,90 +16,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.appcompat.widget.Toolbar
+    <FrameLayout
+        android:id="@+id/fragment_timer_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/gray"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="match_parent" />
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/reset"
-            android:background="@color/gray"
-            android:textColor="@color/red"
-            android:textSize="30sp"
-            android:onClick="resetTapped"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/StartTime"
-            android:id="@+id/timerText"
-            android:textColor="@color/black"
-            android:layout_gravity="center"
-            android:textSize="30sp"/>
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/start"
-            android:id="@+id/startStopButton"
-            android:background="@color/gray"
-            android:textColor="@color/green"
-            android:layout_gravity="end"
-            android:layout_marginEnd="15dp"
-            android:textSize="30sp"
-            android:onClick="startStopTapped"/>
-
-    </androidx.appcompat.widget.Toolbar>
-
-
-    <ImageView
-        android:id="@+id/imageView"
+    <FrameLayout
+        android:id="@+id/fragment_side_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:contentDescription="@string/image_view"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:layout_editor_absoluteY="-136dp" />
+        android:layout_height="match_parent" />
 
-    <Button
-        android:id="@+id/centroid"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
-        android:layout_marginBottom="80dp"
-        android:onClick="centroidButton"
-        android:text="@string/centroid"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <Switch
-        android:id="@+id/haptics"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
-        android:layout_marginBottom="48dp"
-        android:minHeight="48dp"
-        android:onClick="hapticSwitch"
-        android:text="@string/haptics"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:ignore="UseSwitchCompatOrMaterialXml" />
-
-    <Switch
-        android:id="@+id/heatmap"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
-        android:layout_marginBottom="16dp"
-        android:checked="true"
-        android:minHeight="48dp"
-        android:onClick="heatmapSwitch"
-        android:text="@string/heatmap"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:ignore="UseSwitchCompatOrMaterialXml" />
+    <FrameLayout
+        android:id="@+id/fragment_image_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <ImageView
         android:layout_width="30dp"
@@ -110,6 +40,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/pngitem_797167" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
