@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">PhoneRFFL</string>
-    <string name="centroid">Centroid</string>
     <string name="haptics">Haptics</string>
     <string name="heatmap">Heatmap</string>
     <string name="image_view">Image View</string>

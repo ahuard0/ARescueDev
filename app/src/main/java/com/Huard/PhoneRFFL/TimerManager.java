@@ -11,7 +11,7 @@ public class TimerManager {
     private double time;
     private boolean timerStarted;
 
-    java.util.Timer timer;
+    private final java.util.Timer timer;
 
     public TimerManager(TimerFragment fragment) {
         this.fragment = fragment;
