@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AndroidSerialMainActivity">
+
+    <Button
+        android:id="@+id/btnConnect"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/connect"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnDisconnect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/disconnect"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/lblTerminal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="@string/usb_terminal_output"
+        android:textAlignment="center"
+        android:textColor="#007F0A"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/lineChart"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_marginTop="80dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/lblConnected"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="45sp"
+        android:layout_marginTop="16sp"
+        android:text="@string/not_connected"
+        android:textAlignment="center"
+        android:textColor="#E91E63"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/btnConnect"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnBroadcastOn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="120dp"
+        android:text="@string/broadcast_on"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lineChart" />
+
+    <Button
+        android:id="@+id/btnBroadcastOff"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="120dp"
+        android:text="@string/broadcast_off"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lineChart" />
+
+    <Button
+        android:id="@+id/btnSingleRead"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="@string/single_read"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnBroadcastOff" />
+
+    <Button
+        android:id="@+id/btnOnD3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/d3_on"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btnOnD4"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/d4_on"
+        app:layout_constraintBottom_toTopOf="@+id/btnOnD3"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btnOnD5"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/d5_on"
+        app:layout_constraintBottom_toTopOf="@+id/btnOnD4"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btnOnD6"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/d6_on"
+        app:layout_constraintBottom_toTopOf="@+id/btnOnD5"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btnOnD7"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/d7_on"
+        app:layout_constraintBottom_toTopOf="@+id/btnOnD6"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btnOffD3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/d3_off"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/btnOffD4"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/d4_off"
+        app:layout_constraintBottom_toTopOf="@+id/btnOffD3"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/btnOffD5"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/d5_off"
+        app:layout_constraintBottom_toTopOf="@+id/btnOffD4"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/btnOffD6"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/d6_off"
+        app:layout_constraintBottom_toTopOf="@+id/btnOffD5"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/btnOffD7"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/d7_off"
+        app:layout_constraintBottom_toTopOf="@+id/btnOffD6"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
