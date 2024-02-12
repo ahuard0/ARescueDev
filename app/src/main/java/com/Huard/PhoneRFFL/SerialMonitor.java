@@ -116,6 +116,8 @@ public class SerialMonitor extends Thread implements AutoCloseable {
     }
 
     public void updateTerminalStatus(String message) {
+        if (terminalHandler == null)
+            return;
         Message msg = terminalHandler.obtainMessage();
         msg.obj = message;
         terminalHandler.sendMessage(msg);

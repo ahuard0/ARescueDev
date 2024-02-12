@@ -105,12 +105,16 @@ public class SerialClient implements AutoCloseable {
     };
 
     public static void updateConnectionStatus(String message) {
+        if (connectionHandler == null)
+            return;
         Message msg = connectionHandler.obtainMessage();
         msg.obj = message;
         connectionHandler.sendMessage(msg);
     }
 
     public static void updateTerminalStatus(String message) {
+        if (terminalHandler == null)
+            return;
         Message msg = terminalHandler.obtainMessage();
         msg.obj = message;
         terminalHandler.sendMessage(msg);

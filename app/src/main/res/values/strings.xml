@@ -28,5 +28,5 @@
     <string name="broadcast_off">Broadcast (OFF)</string>
     <string name="single_read">Single Read</string>
     <string name="visualizer">Visualizer</string>
-    <string name="plotter">Plotter</string>
+    <string name="connection_status_indicator">Connection Status Indicator</string>
 </resources>

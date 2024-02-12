@@ -35,15 +35,32 @@ public class SolutionFragment extends Fragment {
         sideViewModel.getHapticsSelected().observe(getViewLifecycleOwner(), this::updateHapticsMode);
 
         SolutionViewModel solutionViewModel = new ViewModelProvider(requireActivity()).get(SolutionViewModel.class);
-        solutionViewModel.getAzimuth().observe(getViewLifecycleOwner(), this::UpdateAzimuth);
-        solutionViewModel.getElevation().observe(getViewLifecycleOwner(), this::UpdateElevation);
+        solutionViewModel.getAzimuth().observe(getViewLifecycleOwner(), this::UpdateCentroidAzimuth);
+        solutionViewModel.getElevation().observe(getViewLifecycleOwner(), this::UpdateCentroidElevation);
+
+        ConnectionViewModel connectionViewModel = new ViewModelProvider(requireActivity()).get(ConnectionViewModel.class);
+        connectionViewModel.getIsConnected().observe(getViewLifecycleOwner(), this::receiveIsConnected);
+        connectionViewModel.getConnectionStatusMsg().observe(getViewLifecycleOwner(), this::receiveConnectionStatusMsg);
+        connectionViewModel.getTerminalMsg().observe(getViewLifecycleOwner(), this::receiveConnectionTerminalMsg);
     }
 
-    private void UpdateAzimuth(double value) {
+    private void receiveIsConnected(boolean isConnected) {
+        // TODO: Implement this
+    }
+
+    private void receiveConnectionStatusMsg(String message) {
+        // TODO: Implement this
+    }
+
+    private void receiveConnectionTerminalMsg(String message) {
+        // TODO: Implement this
+    }
+
+    private void UpdateCentroidAzimuth(double value) {
         setAzimuthText(value);
     }
 
-    private void UpdateElevation(double value) {
+    private void UpdateCentroidElevation(double value) {
         setElevationText(value);
     }
 

@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
         initializeSideFragment();
         initializeImageFragment();
         initializeSolutionFragment();
+        initializeConnectionFragment();
     }
 
 
@@ -61,6 +62,9 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
-
-
+    private void initializeConnectionFragment() {  // Show SolutionFragment
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_connection_container, new ConnectionFragment())
+                .commit();
+    }
 }
