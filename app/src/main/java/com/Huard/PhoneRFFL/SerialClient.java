@@ -11,12 +11,11 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import java.util.HashMap;
 import java.util.Objects;
@@ -39,7 +38,6 @@ public class SerialClient implements AutoCloseable {
     public static Handler terminalHandler;
     public static Handler connectionHandler;
 
-    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     public SerialClient(@NonNull Context context, Handler terminalHandler, Handler connectionHandler) {
         SerialClient.terminalHandler = terminalHandler;
         SerialClient.connectionHandler = connectionHandler;

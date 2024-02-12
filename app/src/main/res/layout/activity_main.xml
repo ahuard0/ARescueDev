@@ -44,6 +44,6 @@
         android:contentDescription="@string/png_item"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/pngitem_797167" />
+        app:srcCompat="@mipmap/pngitem_797167" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

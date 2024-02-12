@@ -27,4 +27,6 @@
     <string name="broadcast_on">Broadcast (ON)</string>
     <string name="broadcast_off">Broadcast (OFF)</string>
     <string name="single_read">Single Read</string>
+    <string name="visualizer">Visualizer</string>
+    <string name="plotter">Plotter</string>
 </resources>

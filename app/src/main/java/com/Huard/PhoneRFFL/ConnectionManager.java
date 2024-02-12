@@ -1,11 +1,8 @@
 package com.Huard.PhoneRFFL;
 
 import android.content.Context;
-import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
-
-import androidx.annotation.RequiresApi;
 
 public class ConnectionManager {
     public SerialClient client;
@@ -19,7 +16,6 @@ public class ConnectionManager {
         this.statusConnectionHandler = statusConnectionHandler;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     public void connect() {
         if (client == null)
             client = new SerialClient(applicationContext, statusTerminalHandler, statusConnectionHandler);

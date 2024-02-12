@@ -1,5 +1,6 @@
 package com.Huard.PhoneRFFL;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,14 +28,23 @@ public class TimerFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        btnReset = view.findViewById(R.id.resetButton);
-        btnStartStop = view.findViewById(R.id.startStopButton);
-        lblTimerStatus = view.findViewById(R.id.timerText);
+        btnReset = view.findViewById(R.id.btnReset);
+        btnStartStop = view.findViewById(R.id.btnStartStop);
+        lblTimerStatus = view.findViewById(R.id.lblTimerStatus);
 
         btnReset.setOnClickListener(v -> onPressReset());
         btnStartStop.setOnClickListener(v -> onPressStartStop());
 
+        TextView lblTimerStatus = view.findViewById(R.id.lblTimerStatus);
+        lblTimerStatus.setOnClickListener(v -> onPressBtnGoToPlotter());
+
         timerManager = new TimerManager(this);
+    }
+
+    private void onPressBtnGoToPlotter() {
+        Intent intent = new Intent(requireContext(), AndroidSerialMainActivity.class);
+        startActivity(intent);
+        requireActivity().finish();  // finish the current activity
     }
 
     private void onPressReset() {

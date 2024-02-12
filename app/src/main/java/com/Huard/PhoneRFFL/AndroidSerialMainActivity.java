@@ -1,6 +1,6 @@
 package com.Huard.PhoneRFFL;
 
-import android.os.Build;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -8,7 +8,6 @@ import android.os.Message;
 import android.widget.Button;
 import android.widget.TextView;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -21,7 +20,6 @@ public class AndroidSerialMainActivity extends AppCompatActivity implements Stat
     private ChartManager chartManager;
     private ConnectionManager connectionManager;
 
-    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,7 +49,6 @@ public class AndroidSerialMainActivity extends AppCompatActivity implements Stat
         }
     };
 
-    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     private void initialize() {
         lblTerminal = findViewById(R.id.lblTerminal);
         lblConnected = findViewById(R.id.lblConnected);
@@ -69,6 +66,8 @@ public class AndroidSerialMainActivity extends AppCompatActivity implements Stat
         Button btnOffD5 = findViewById(R.id.btnOffD5);
         Button btnOffD6 = findViewById(R.id.btnOffD6);
         Button btnOffD7 = findViewById(R.id.btnOffD7);
+
+        Button btnGoToVisualizer = findViewById(R.id.btnGoToVisualizer);
 
         Button btnBroadcastOn = findViewById(R.id.btnBroadcastOn);
         Button btnBroadcastOff = findViewById(R.id.btnBroadcastOff);
@@ -88,6 +87,8 @@ public class AndroidSerialMainActivity extends AppCompatActivity implements Stat
         btnOffD6.setOnClickListener(v -> onPressOffD6());
         btnOffD7.setOnClickListener(v -> onPressOffD7());
 
+        btnGoToVisualizer.setOnClickListener(v -> onPressGoToVisualizer());
+
         btnBroadcastOn.setOnClickListener(v -> onPressBroadcastOn());
         btnBroadcastOff.setOnClickListener(v -> onPressBroadcastOff());
         btnSingleRead.setOnClickListener(v -> onPressSingleRead());
@@ -104,7 +105,6 @@ public class AndroidSerialMainActivity extends AppCompatActivity implements Stat
         lblConnected.setText(msg);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     private void onPressConnect() {
         connectionManager.connect();
     }
@@ -165,7 +165,13 @@ public class AndroidSerialMainActivity extends AppCompatActivity implements Stat
         connectionManager.client.write("$|_SINGLE_READ\n");
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    private void onPressGoToVisualizer() {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        connectionManager.disconnect();
+        finish();
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
