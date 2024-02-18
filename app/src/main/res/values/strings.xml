@@ -29,4 +29,9 @@
     <string name="single_read">Single Read</string>
     <string name="visualizer">Visualizer</string>
     <string name="connection_status_indicator">Connection Status Indicator</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="terminal">Terminal Message</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="simulated">Simulated</string>
 </resources>

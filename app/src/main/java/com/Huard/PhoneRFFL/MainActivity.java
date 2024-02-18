@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
         initializeImageFragment();
         initializeSolutionFragment();
         initializeConnectionFragment();
+        initializeSimulationFragment();
     }
 
 
@@ -36,6 +37,12 @@ public class MainActivity extends AppCompatActivity {
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
 
         setContentView(R.layout.activity_main);
+    }
+
+    private void initializeSimulationFragment() {  // Show SimulationFragment
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_simulation_container, new SimulationFragment())
+                .commit();
     }
 
     private void initializeSolutionFragment() {  // Show SolutionFragment
