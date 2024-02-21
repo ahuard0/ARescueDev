@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">PhoneRFFL</string>
     <string name="haptics">Haptics</string>
-    <string name="heatmap">Heatmap</string>
+    <string name="heatmap">Visualizer</string>
     <string name="image_view">Image View</string>
     <string name="png_item">PNG Item</string>
     <string name="start">START</string>

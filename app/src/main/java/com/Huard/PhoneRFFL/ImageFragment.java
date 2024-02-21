@@ -5,13 +5,14 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
 import android.media.ImageReader;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Size;
 import android.view.LayoutInflater;
@@ -29,37 +30,22 @@ import java.util.LinkedList;
 
 public class ImageFragment extends Fragment implements ImageReader.OnImageAvailableListener {
     public ImageView imageView;
+    private SolutionViewModel solutionViewModel;
+    private final Canvas canvas;
     public Bitmap bitmap = Bitmap.createBitmap(MainActivity.screenWidth, MainActivity.screenHeight, Bitmap.Config.ARGB_8888);
     private final LinkedList<PointAOA> azimuthPointsAOA = new LinkedList<>();
     private final LinkedList<PointAOA> elevationPointsAOA = new LinkedList<>();
-    private HandlerThread handlerThread;
-    private Handler workerHandler;  // Worker thread
-    private final int FPS = 30;
-    private final ColorMapJet colorMap = new ColorMapJet();
-    private int[][] valueMatrix; // matrix of numerical values for pixel colors
-    private final LinkedList<Integer> x_marginal = new LinkedList<>();
-    private final LinkedList<Integer> y_marginal = new LinkedList<>();
-    private int sumX = 0;
-    private int sumY = 0;
-    private int pointCount = 0;
+    private final ColorMapJet colorMap = new ColorMapJet();  // matrix of numerical values for pixel colors
     private double centroidAzimuth = 0f;
     private double centroidElevation = 0f;
-    private double centroidX = 0f;
-    private double centroidY = 0f;
+    private double sigmaAzimuth;
+    private double sigmaElevation;
     final float fx = (float) MainActivity.screenWidth; // for matrix transformation
-    final float fy = (float) -fx; // for matrix transformation
-    private SolutionViewModel solutionViewModel;
-    private boolean isHeatMapSelected = false;
+    final float fy = -fx; // for matrix transformation
 
     public ImageFragment() {
-        resetPlotMatrix();
+        canvas = new Canvas(bitmap);
         resetBitmap(); // initial bitmap coloring (transparent and almost invisible)
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        handlerThread.quit();  // Quit the worker thread when the fragment's view is destroyed
     }
 
     @Nullable
@@ -67,11 +53,6 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_image, container, false);  // Inflate the layout for this fragment
         imageView = rootView.findViewById(R.id.imageView);
-
-        // Create and start the worker thread
-        handlerThread = new HandlerThread("WorkerThread");
-        handlerThread.start();
-        workerHandler = new Handler(handlerThread.getLooper());
 
         startBitmapUpdates();  // Image Update Loop
 
@@ -100,7 +81,7 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
     }
 
     @Override
-    public void onImageAvailable(ImageReader imageReader) {
+    public void onImageAvailable(ImageReader imageReader) {  /* Necessary for smooth camera updates */
         imageReader.acquireLatestImage().close();
     }
 
@@ -112,34 +93,81 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
         elevationPointsAOA.add(new PointAOA(AOA_deg, PointAOA.Type.ELEVATION));
     }
 
-    private final Handler uiHandler = new Handler(msg -> {  // asynchronous handler to update the bitmap image
-        if (msg.what == 1 && bitmap != null) {
-            imageView.setImageBitmap(bitmap);  // Update the ImageView UI
-        }
-        return true;
-    });
+    private final Handler uiHandler = new Handler(Looper.getMainLooper()); // UI handler on the main (UI) thread
 
     private void startBitmapUpdates() {
-        workerHandler.post(new Runnable() {  // bitmap update loop
-            @Override
-            public void run() {
-                while(true) {
-                    updateBitmap();  // generate frame
-                    uiHandler.sendEmptyMessage(1);  // Notify UI thread to update the image view
-                    workerHandler.postDelayed(this, (long) 1000 / FPS); // 30.3 FPS, schedule the next update
-                }
-            }
-        });
+        uiHandler.post(updateBitmapRunnable);  // Schedule the first update immediately
     }
+
+    private final Runnable updateBitmapRunnable = new Runnable() {  // Define a Runnable for updating the bitmap
+        @Override
+        public void run() {
+            updateBitmap(); // Generate frame
+            imageView.setImageBitmap(bitmap); // Update the ImageView UI
+
+            int FPS = 60;
+            uiHandler.postDelayed(this, 1000 / FPS);  // Schedule the next update after the specified delay
+        }
+    };
 
     private void updateBitmap() {
         resetBitmap();
-        resetPlotMatrix();
-        resetPixelCentroid();
         updateMarginalDistributionAzimuth();
         updateMarginalDistributionElevation();
-        updatePlotMatrixCentroidAndBitmap();
+        updatePlotGaussianEllipse();
         postCentroidSolution();
+    }
+
+    private void updatePlotGaussianEllipse() {
+        double meanAzimuthPx = convertAngleToPixels(new PointAOA(this.centroidAzimuth, PointAOA.Type.AZIMUTH));
+        double meanElevationPx = convertAngleToPixels(new PointAOA(this.centroidElevation, PointAOA.Type.ELEVATION));
+        double meanPlusOneSigmaAziPx = convertAngleToPixels(new PointAOA(this.centroidAzimuth + this.sigmaAzimuth, PointAOA.Type.AZIMUTH));
+        double meanPlusOneSigmaElevPx = convertAngleToPixels(new PointAOA(this.centroidElevation + this.sigmaElevation, PointAOA.Type.ELEVATION));
+        drawGaussianSigma(this.canvas,
+                meanAzimuthPx,
+                meanElevationPx,
+                meanPlusOneSigmaAziPx - meanAzimuthPx,
+                meanPlusOneSigmaElevPx - meanElevationPx);
+    }
+
+    private void drawGaussianSigma(Canvas canvas, double meanX_px, double meanY_px, double sigmaX_px, double sigmaY_px) {
+        if (canvas == null) return;
+
+        // Create a RectF to define the bounds of the ellipse
+        RectF bounds1S = new RectF();
+        bounds1S.left = (float) (meanX_px - sigmaX_px);
+        bounds1S.top = (float) (meanY_px - sigmaY_px);
+        bounds1S.right = (float) (meanX_px + sigmaX_px);
+        bounds1S.bottom = (float) (meanY_px + sigmaY_px);
+
+        // Create a RectF to define the bounds of the ellipse
+        RectF bounds2S = new RectF();
+        bounds2S.left = (float) (meanX_px - 2*sigmaX_px);
+        bounds2S.top = (float) (meanY_px - 2*sigmaY_px);
+        bounds2S.right = (float) (meanX_px + 2*sigmaX_px);
+        bounds2S.bottom = (float) (meanY_px + 2*sigmaY_px);
+
+        // Draw the ellipse on the canvas
+        Paint paint = new Paint();
+        paint.setColor(Color.GREEN);
+        paint.setStyle(Paint.Style.STROKE);
+
+        // Draw the "X" at the mean position
+        paint.setStrokeWidth(6);
+        canvas.drawLine((float) (meanX_px - 10), (float) (meanY_px - 10), (float) (meanX_px + 10), (float) (meanY_px + 10), paint);
+        canvas.drawLine((float) (meanX_px + 10), (float) (meanY_px - 10), (float) (meanX_px - 10), (float) (meanY_px + 10), paint);
+
+        paint.setStrokeWidth(4);
+        DashPathEffect dashPathEffect = new DashPathEffect(new float[]{10, 5}, 0);  // Define the dash pattern (10 pixels on, 5 pixels off)
+        paint.setPathEffect(dashPathEffect);
+        canvas.drawOval(bounds1S, paint);
+        canvas.drawOval(bounds2S, paint);
+
+        // Draw the "X" at the mean position
+        paint.setStrokeWidth(6);
+        canvas.drawLine((float) (meanX_px - 10), (float) (meanY_px - 10), (float) (meanX_px + 10), (float) (meanY_px + 10), paint);
+        canvas.drawLine((float) (meanX_px + 10), (float) (meanY_px - 10), (float) (meanX_px - 10), (float) (meanY_px + 10), paint);
+        imageView.invalidate();
     }
 
     private void postCentroidSolution() {  // Send centroid to Solution Fragment
@@ -147,17 +175,6 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
         handler.post(() -> {
             solutionViewModel.setCentroidAzimuth(centroidAzimuth);
             solutionViewModel.setCentroidElevation(centroidElevation);
-            solutionViewModel.setCentroidX(centroidX);
-            solutionViewModel.setCentroidY(centroidY);
-            if (!this.isHeatMapSelected) {
-                Canvas canvas = new Canvas(bitmap);
-
-                Paint paint = new Paint();
-                paint.setColor(Color.RED); // Set the color
-
-                canvas.drawCircle((float) centroidX, (float) centroidY, 30, paint);
-                canvas.setBitmap(null);
-            }
         });
     }
 
@@ -165,69 +182,36 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
         bitmap.eraseColor(colorMap.getColorByIndex(0));
     }
 
-    private void resetPlotMatrix() {  // sets the plot matrix to zero
-        valueMatrix = new int[MainActivity.screenHeight][MainActivity.screenWidth];
-    }
-
-    private void resetPixelCentroid() {
-        sumX = 0;
-        sumY = 0;
-        pointCount = 0;
-        centroidX = 0;
-        centroidY = 0;
-    }
-
-    private void updatePlotMatrixCentroidAndBitmap() {  // generates the intersection density of x-y marginal distributions
-        for (int i=0; i<x_marginal.size(); i++) {
-            for (int j=0; j<y_marginal.size(); j++) {
-                addPixelToBitmap(x_marginal.get(i), y_marginal.get(j));  // PIXEL SIZE: 10px
-                addPixelToCentroid(x_marginal.get(i), y_marginal.get(j));
-            }
-        }
-    }
-
-    private void addPixelToCentroid(int x, int y) {
-        sumX += x;
-        sumY += y;
-        pointCount++;
-        centroidX = (double)sumX/pointCount;
-        centroidY = (double)sumY/pointCount;
-    }
-
-    private void addPixelToBitmap(int x, int y) {
-        int left = Math.max(x - 30 /2, 0);
-        int up = Math.max(y - 30 /2, 0);
-        int right = Math.min(x + 30 /2, MainActivity.screenWidth);
-        int bot = Math.min(y + 30 /2, MainActivity.screenHeight);
-
-        for (int i = left; i <= right; i++) {
-            for (int j = up; j <= bot; j++) {
-                valueMatrix[j][i]++;  // increment color map intensity
-                bitmap.setPixel(i, j, colorMap.getColorByIndex(valueMatrix[j][i]));  // draw pixel with color
-            }
-        }
-    }
-
     private void updateMarginalDistributionAzimuth() {
         removeExpiredPoints(azimuthPointsAOA);
-        x_marginal.clear();
+
+        // Calculate Mean
         double sumAngle = 0;
         for (int i = 0; i<azimuthPointsAOA.size(); i++) {
-            x_marginal.add(convertAngleToPixels(azimuthPointsAOA.get(i)));
             sumAngle += azimuthPointsAOA.get(i).getValue();
             centroidAzimuth = sumAngle/azimuthPointsAOA.size();
         }
+
+        // Calculate StdDev
+        double sumSquaredDeviations = 0;
+        for (PointAOA point : azimuthPointsAOA) {
+            sumSquaredDeviations += Math.pow(point.getValue() - centroidAzimuth, 2);
+        }
+        sigmaAzimuth = Math.sqrt(sumSquaredDeviations / (azimuthPointsAOA.size() - 1)); // Sample standard deviation
     }
 
     private void updateMarginalDistributionElevation() {
         removeExpiredPoints(elevationPointsAOA);
-        y_marginal.clear();
+
+        // Calculate Mean and StdDev
         double sumAngle = 0;
-        for (int i = 0; i<elevationPointsAOA.size(); i++) {
-            y_marginal.add(convertAngleToPixels(elevationPointsAOA.get(i)));
-            sumAngle += elevationPointsAOA.get(i).getValue();
-            centroidElevation = sumAngle/elevationPointsAOA.size();
+        double sumSquaredDeviations = 0;
+        for (PointAOA point : elevationPointsAOA) {
+            sumAngle += point.getValue();
+            sumSquaredDeviations += Math.pow(point.getValue() - centroidElevation, 2);
         }
+        centroidElevation = sumAngle/elevationPointsAOA.size();
+        sigmaElevation = Math.sqrt(sumSquaredDeviations / (elevationPointsAOA.size() - 1)); // Sample standard deviation
     }
 
     private int convertAngleToPixels(PointAOA pointAOA) {
@@ -250,11 +234,17 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
     }
 
     private void receiveHeatMapSelector(boolean isHeatMapSelected) {  // toggle switch enables or disables heatmap visibility
-        this.isHeatMapSelected = isHeatMapSelected;
-        if (this.isHeatMapSelected) {
+
+        // Show ImageView
+        if (isHeatMapSelected) {
             imageView.setImageAlpha(255);
         } else {
             imageView.setImageAlpha(0);
+        }
+
+        // Clear Bitmap
+        if (!isHeatMapSelected) {
+            resetBitmap();
         }
     }
 
