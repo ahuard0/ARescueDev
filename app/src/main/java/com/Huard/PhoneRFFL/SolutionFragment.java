@@ -33,12 +33,12 @@ public class SolutionFragment extends Fragment {
         lblElevation = view.findViewById(R.id.lblElevation);
 
         SideViewModel sideViewModel = new ViewModelProvider(requireActivity()).get(SideViewModel.class);
-        sideViewModel.getCentroidSelected().observe(getViewLifecycleOwner(), this::receiveCentroidMode);
+        sideViewModel.getCentroidAOASelected().observe(getViewLifecycleOwner(), this::receiveShowAOAMode);
         sideViewModel.getHapticsSelected().observe(getViewLifecycleOwner(), this::receiveHapticsMode);
 
         solutionViewModel = new ViewModelProvider(requireActivity()).get(SolutionViewModel.class);
-        solutionViewModel.getCentroidAzimuth().observe(getViewLifecycleOwner(), this::receiveCentroidAzimuth);
-        solutionViewModel.getCentroidElevation().observe(getViewLifecycleOwner(), this::receiveCentroidElevation);
+        solutionViewModel.getCentroidAOAAzimuth().observe(getViewLifecycleOwner(), this::receiveCentroidAOAAzimuth);
+        solutionViewModel.getCentroidAOAElevation().observe(getViewLifecycleOwner(), this::receiveCentroidAOAElevation);
 
         ChannelViewModel channelViewModel = new ViewModelProvider(requireActivity()).get(ChannelViewModel.class);
         channelViewModel.getChannelDataAzimuth().observe(getViewLifecycleOwner(), this::receiveAzimuthADC);
@@ -90,15 +90,15 @@ public class SolutionFragment extends Fragment {
         return dBm;
     }
 
-    private void receiveCentroidAzimuth(double value) {
-        setAzimuthText(value);
+    private void receiveCentroidAOAAzimuth(double value) {
+        setAOASolutionAzimuthText(value);
     }
 
-    private void receiveCentroidElevation(double value) {
-        setElevationText(value);
+    private void receiveCentroidAOAElevation(double value) {
+        setAOASolutionElevationText(value);
     }
 
-    private void receiveCentroidMode(boolean isCentroidSelected) {
+    private void receiveShowAOAMode(boolean isCentroidSelected) {
         if (isCentroidSelected) {
             lblAzimuth.setVisibility(View.VISIBLE);
             lblElevation.setVisibility(View.VISIBLE);
@@ -112,12 +112,12 @@ public class SolutionFragment extends Fragment {
         // TODO: Implement Haptics Cues
     }
 
-    public void setAzimuthText(double value) {
+    public void setAOASolutionAzimuthText(double value) {
         @SuppressLint("DefaultLocale") String text = String.format("%.1f°<sup><small>Az</small></sup>", value);
         lblAzimuth.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT));
     }
 
-    public void setElevationText(double value) {
+    public void setAOASolutionElevationText(double value) {
         @SuppressLint("DefaultLocale") String text = String.format("%.1f°<sup><small>El</small></sup>", value);
         lblElevation.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT));
     }

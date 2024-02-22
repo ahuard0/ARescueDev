@@ -6,11 +6,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 public class TimerFragment extends Fragment {
 
@@ -18,6 +20,7 @@ public class TimerFragment extends Fragment {
     public TextView lblTimerStatus;
     public Button btnStartStop;
     public Button btnReset;
+    private FrameLayout frameTimer;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -28,6 +31,7 @@ public class TimerFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        frameTimer = view.findViewById(R.id.frameTimer);
         btnReset = view.findViewById(R.id.btnReset);
         btnStartStop = view.findViewById(R.id.btnStartStop);
         lblTimerStatus = view.findViewById(R.id.lblTimerStatus);
@@ -38,7 +42,17 @@ public class TimerFragment extends Fragment {
         TextView lblTimerStatus = view.findViewById(R.id.lblTimerStatus);
         lblTimerStatus.setOnClickListener(v -> onPressBtnGoToPlotter());
 
+        SideViewModel sideViewModel = new ViewModelProvider(requireActivity()).get(SideViewModel.class);
+        sideViewModel.getWidgetsSelected().observe(getViewLifecycleOwner(), this::onPressChkWidgets);
+
         timerManager = new TimerManager(this);
+    }
+
+    private void onPressChkWidgets(boolean isWidgetsSelected) {
+        if (isWidgetsSelected)
+            frameTimer.setVisibility(View.VISIBLE);
+        else
+            frameTimer.setVisibility(View.INVISIBLE);
     }
 
     private void onPressBtnGoToPlotter() {

@@ -16,9 +16,11 @@ public class SideFragment extends Fragment {
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     public Switch chkHaptics;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
-    public Switch chkHeatmap;
+    public Switch chkEllipse;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
-    public Switch chkShowCentroid;
+    public Switch chkShowCentroidAOA;
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
+    public Switch chkShowWidgets;
     private SideViewModel sideViewModel;
 
     @Override
@@ -30,23 +32,29 @@ public class SideFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        chkShowCentroid = view.findViewById(R.id.chkShowCentroid);
-        chkHeatmap = view.findViewById(R.id.chkHeatmap);
+        chkShowWidgets = view.findViewById(R.id.chkShowWidgets);
+        chkShowCentroidAOA = view.findViewById(R.id.chkShowAOA);
+        chkEllipse = view.findViewById(R.id.chkEllipse);
         chkHaptics = view.findViewById(R.id.chkHaptics);
 
-        chkShowCentroid.setOnClickListener(v -> onPressChkShowCentroid());
-        chkHeatmap.setOnClickListener(v -> onPressChkHeatmap());
+        chkShowWidgets.setOnClickListener(v -> onPressChkShowWidgets());
+        chkShowCentroidAOA.setOnClickListener(v -> onPressChkShowCentroidAOA());
+        chkEllipse.setOnClickListener(v -> onPressChkEllipse());
         chkHaptics.setOnClickListener(v -> onPressChkHaptics());
 
         sideViewModel = new ViewModelProvider(requireActivity()).get(SideViewModel.class);
     }
 
-    private void onPressChkShowCentroid() {
-        sideViewModel.setCentroidSelected(chkShowCentroid.isChecked());
+    private void onPressChkShowWidgets() {
+        sideViewModel.setWidgetsSelected(chkShowWidgets.isChecked());
     }
 
-    private void onPressChkHeatmap() {
-        sideViewModel.setHeatMapSelected(chkHeatmap.isChecked());
+    private void onPressChkShowCentroidAOA() {
+        sideViewModel.setCentroidAOASelected(chkShowCentroidAOA.isChecked());
+    }
+
+    private void onPressChkEllipse() {
+        sideViewModel.setEllipseSelected(chkEllipse.isChecked());
     }
 
     private void onPressChkHaptics() {

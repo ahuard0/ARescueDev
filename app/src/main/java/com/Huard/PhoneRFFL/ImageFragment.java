@@ -36,10 +36,10 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
     private final LinkedList<PointAOA> azimuthPointsAOA = new LinkedList<>();
     private final LinkedList<PointAOA> elevationPointsAOA = new LinkedList<>();
     private final ColorMapJet colorMap = new ColorMapJet();  // matrix of numerical values for pixel colors
-    private double centroidAzimuth = 0f;
-    private double centroidElevation = 0f;
-    private double sigmaAzimuth;
-    private double sigmaElevation;
+    private double centroidAOAAzimuth = 0f;
+    private double centroidAOAElevation = 0f;
+    private double sigmaAOAAzimuth;
+    private double sigmaAOAElevation;
     final float fx = (float) MainActivity.screenWidth; // for matrix transformation
     final float fy = -fx; // for matrix transformation
 
@@ -73,7 +73,7 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
         imageView.setImageBitmap(bitmap);
 
         SideViewModel sideViewModel = new ViewModelProvider(requireActivity()).get(SideViewModel.class);
-        sideViewModel.getHeatMapSelected().observe(getViewLifecycleOwner(), this::receiveHeatMapSelector);
+        sideViewModel.getEllipseSelected().observe(getViewLifecycleOwner(), this::receiveEllipseSelector);
 
         solutionViewModel = new ViewModelProvider(requireActivity()).get(SolutionViewModel.class);
         solutionViewModel.getAzimuthPointAOA().observe(getViewLifecycleOwner(), this::receiveAzimuthPointAOA);
@@ -115,14 +115,14 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
         updateMarginalDistributionAzimuth();
         updateMarginalDistributionElevation();
         updatePlotGaussianEllipse();
-        postCentroidSolution();
+        postCentroidAOASolution();
     }
 
     private void updatePlotGaussianEllipse() {
-        double meanAzimuthPx = convertAngleToPixels(new PointAOA(this.centroidAzimuth, PointAOA.Type.AZIMUTH));
-        double meanElevationPx = convertAngleToPixels(new PointAOA(this.centroidElevation, PointAOA.Type.ELEVATION));
-        double meanPlusOneSigmaAziPx = convertAngleToPixels(new PointAOA(this.centroidAzimuth + this.sigmaAzimuth, PointAOA.Type.AZIMUTH));
-        double meanPlusOneSigmaElevPx = convertAngleToPixels(new PointAOA(this.centroidElevation + this.sigmaElevation, PointAOA.Type.ELEVATION));
+        double meanAzimuthPx = convertAngleToPixels(new PointAOA(this.centroidAOAAzimuth, PointAOA.Type.AZIMUTH));
+        double meanElevationPx = convertAngleToPixels(new PointAOA(this.centroidAOAElevation, PointAOA.Type.ELEVATION));
+        double meanPlusOneSigmaAziPx = convertAngleToPixels(new PointAOA(this.centroidAOAAzimuth + this.sigmaAOAAzimuth, PointAOA.Type.AZIMUTH));
+        double meanPlusOneSigmaElevPx = convertAngleToPixels(new PointAOA(this.centroidAOAElevation + this.sigmaAOAElevation, PointAOA.Type.ELEVATION));
         drawGaussianSigma(this.canvas,
                 meanAzimuthPx,
                 meanElevationPx,
@@ -170,11 +170,11 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
         imageView.invalidate();
     }
 
-    private void postCentroidSolution() {  // Send centroid to Solution Fragment
+    private void postCentroidAOASolution() {  // Send centroid to Solution Fragment
         Handler handler = new Handler(Looper.getMainLooper());  // Post updates to LiveData on the main thread
         handler.post(() -> {
-            solutionViewModel.setCentroidAzimuth(centroidAzimuth);
-            solutionViewModel.setCentroidElevation(centroidElevation);
+            solutionViewModel.setCentroidAOAAzimuth(centroidAOAAzimuth);
+            solutionViewModel.setCentroidAOAElevation(centroidAOAElevation);
         });
     }
 
@@ -189,15 +189,15 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
         double sumAngle = 0;
         for (int i = 0; i<azimuthPointsAOA.size(); i++) {
             sumAngle += azimuthPointsAOA.get(i).getValue();
-            centroidAzimuth = sumAngle/azimuthPointsAOA.size();
+            centroidAOAAzimuth = sumAngle/azimuthPointsAOA.size();
         }
 
         // Calculate StdDev
         double sumSquaredDeviations = 0;
         for (PointAOA point : azimuthPointsAOA) {
-            sumSquaredDeviations += Math.pow(point.getValue() - centroidAzimuth, 2);
+            sumSquaredDeviations += Math.pow(point.getValue() - centroidAOAAzimuth, 2);
         }
-        sigmaAzimuth = Math.sqrt(sumSquaredDeviations / (azimuthPointsAOA.size() - 1)); // Sample standard deviation
+        sigmaAOAAzimuth = Math.sqrt(sumSquaredDeviations / (azimuthPointsAOA.size() - 1)); // Sample standard deviation
     }
 
     private void updateMarginalDistributionElevation() {
@@ -208,10 +208,10 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
         double sumSquaredDeviations = 0;
         for (PointAOA point : elevationPointsAOA) {
             sumAngle += point.getValue();
-            sumSquaredDeviations += Math.pow(point.getValue() - centroidElevation, 2);
+            sumSquaredDeviations += Math.pow(point.getValue() - centroidAOAElevation, 2);
         }
-        centroidElevation = sumAngle/elevationPointsAOA.size();
-        sigmaElevation = Math.sqrt(sumSquaredDeviations / (elevationPointsAOA.size() - 1)); // Sample standard deviation
+        centroidAOAElevation = sumAngle/elevationPointsAOA.size();
+        sigmaAOAElevation = Math.sqrt(sumSquaredDeviations / (elevationPointsAOA.size() - 1)); // Sample standard deviation
     }
 
     private int convertAngleToPixels(PointAOA pointAOA) {
@@ -233,17 +233,17 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
         }
     }
 
-    private void receiveHeatMapSelector(boolean isHeatMapSelected) {  // toggle switch enables or disables heatmap visibility
+    private void receiveEllipseSelector(boolean isEllipseSelected) {  // toggle switch enables or disables heatmap visibility
 
         // Show ImageView
-        if (isHeatMapSelected) {
+        if (isEllipseSelected) {
             imageView.setImageAlpha(255);
         } else {
             imageView.setImageAlpha(0);
         }
 
         // Clear Bitmap
-        if (!isHeatMapSelected) {
+        if (!isEllipseSelected) {
             resetBitmap();
         }
     }

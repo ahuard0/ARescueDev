@@ -5,16 +5,25 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 public class SideViewModel extends ViewModel {
-    private final MutableLiveData<Boolean> centroidSelected = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> widgetsSelected = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> centroidAOASelected = new MutableLiveData<>();
     private final MutableLiveData<Boolean> hapticsSelected = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> heatMapSelected = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> ellipseSelected = new MutableLiveData<>();
 
-    public void setCentroidSelected(Boolean value) {
-        centroidSelected.setValue(value);
+    public void setWidgetsSelected(Boolean value) {
+        widgetsSelected.setValue(value);
     }
 
-    public LiveData<Boolean> getCentroidSelected() {
-        return centroidSelected;
+    public LiveData<Boolean> getWidgetsSelected() {
+        return widgetsSelected;
+    }
+
+    public void setCentroidAOASelected(Boolean value) {
+        centroidAOASelected.setValue(value);
+    }
+
+    public LiveData<Boolean> getCentroidAOASelected() {
+        return centroidAOASelected;
     }
     public void setIsHapticsSelected(Boolean value) {
         hapticsSelected.setValue(value);
@@ -23,11 +32,11 @@ public class SideViewModel extends ViewModel {
     public LiveData<Boolean> getHapticsSelected() {
         return hapticsSelected;
     }
-    public void setHeatMapSelected(Boolean value) {
-        heatMapSelected.setValue(value);
+    public void setEllipseSelected(Boolean value) {
+        ellipseSelected.setValue(value);
     }
 
-    public LiveData<Boolean> getHeatMapSelected() {
-        return heatMapSelected;
+    public LiveData<Boolean> getEllipseSelected() {
+        return ellipseSelected;
     }
 }
