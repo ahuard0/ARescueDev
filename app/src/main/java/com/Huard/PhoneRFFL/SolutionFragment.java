@@ -108,6 +108,7 @@ public class SolutionFragment extends Fragment {
         }
     }
 
+    /** @noinspection EmptyMethod, unused */
     private void receiveHapticsMode(boolean isHapticsSelected) {
         // TODO: Implement Haptics Cues
     }

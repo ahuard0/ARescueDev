@@ -32,7 +32,7 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
     public ImageView imageView;
     private SolutionViewModel solutionViewModel;
     private final Canvas canvas;
-    public Bitmap bitmap = Bitmap.createBitmap(MainActivity.screenWidth, MainActivity.screenHeight, Bitmap.Config.ARGB_8888);
+    public final Bitmap bitmap = Bitmap.createBitmap(MainActivity.screenWidth, MainActivity.screenHeight, Bitmap.Config.ARGB_8888);
     private final LinkedList<PointAOA> azimuthPointsAOA = new LinkedList<>();
     private final LinkedList<PointAOA> elevationPointsAOA = new LinkedList<>();
     private final ColorMapJet colorMap = new ColorMapJet();  // matrix of numerical values for pixel colors

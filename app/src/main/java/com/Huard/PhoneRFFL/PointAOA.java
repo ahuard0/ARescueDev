@@ -7,7 +7,7 @@ public class PointAOA {
     private final long timestamp;
     private final Type type;
 
-    public enum Type {AZIMUTH, ELEVATION, UNDEFINED}
+    public enum Type {AZIMUTH, ELEVATION}
 
     public PointAOA(double value, Type type) {
         this.value = value;

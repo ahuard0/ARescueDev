@@ -21,6 +21,7 @@ public class ConnectionViewModel extends ViewModel {
         connectionStatus.postValue(value);
     }
 
+    /** @noinspection unused*/
     public LiveData<String> getConnectionStatusMsg() {
         return connectionStatus;
     }

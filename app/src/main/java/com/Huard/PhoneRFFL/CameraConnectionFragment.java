@@ -195,6 +195,7 @@ public class CameraConnectionFragment extends Fragment {
         // Collect the supported resolutions that are at least as big as the preview Surface
         boolean exactSizeFound = false;
         final List<Size> bigEnough = new ArrayList<>();
+        //noinspection MismatchedQueryAndUpdateOfCollection
         final List<Size> tooSmall = new ArrayList<>();
         for (final Size option : choices) {
             if (option.equals(desiredSize)) {
@@ -506,6 +507,7 @@ public class CameraConnectionFragment extends Fragment {
      * known.
      */
     public interface ConnectionCallback {
+        /** @noinspection EmptyMethod, unused, unused */
         void onPreviewSizeChosen(Size size, int cameraRotation);
     }
 

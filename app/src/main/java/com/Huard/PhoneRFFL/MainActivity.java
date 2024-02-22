@@ -11,7 +11,6 @@ public class MainActivity extends AppCompatActivity {
 
     static final int screenWidth = 2400;
     static final int screenHeight = 1080;
-    static final int range = 10;
 
 
     @Override
