@@ -27,6 +27,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.util.LinkedList;
+import java.util.Queue;
 
 public class ImageFragment extends Fragment implements ImageReader.OnImageAvailableListener {
     public ImageView imageView;
@@ -40,6 +41,14 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
     private double centroidAOAElevation = 0f;
     private double sigmaAOAAzimuth;
     private double sigmaAOAElevation;
+    private final double[] valueBufferAzimuth = new double[10];
+    private int bufferIndexAzimuth = 0; // Index to keep track of the current position in the circular buffer
+    private double rollingSumAzimuth = 0; // Variable to store the sum of the last 10 values
+    private double rollingCentroidAOAAzimuth = 0;
+    private final double[] valueBufferElevation = new double[10];
+    private int bufferIndexElevation = 0; // Index to keep track of the current position in the circular buffer
+    private double rollingSumElevation = 0; // Variable to store the sum of the last 10 values
+    private double rollingCentroidAOAElevation = 0;
     final float fx = (float) MainActivity.screenWidth; // for matrix transformation
     final float fy = -fx; // for matrix transformation
 
@@ -76,8 +85,8 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
         sideViewModel.getEllipseSelected().observe(getViewLifecycleOwner(), this::receiveEllipseSelector);
 
         solutionViewModel = new ViewModelProvider(requireActivity()).get(SolutionViewModel.class);
-        solutionViewModel.getAzimuthPointAOA().observe(getViewLifecycleOwner(), this::receiveAzimuthPointAOA);
-        solutionViewModel.getElevationPointAOA().observe(getViewLifecycleOwner(), this::receiveElevationPointAOA);
+        solutionViewModel.getAzimuthPointsAOA().observe(getViewLifecycleOwner(), this::receiveAzimuthPointAOA);
+        solutionViewModel.getElevationPointsAOA().observe(getViewLifecycleOwner(), this::receiveElevationPointAOA);
     }
 
     @Override
@@ -85,12 +94,14 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
         imageReader.acquireLatestImage().close();
     }
 
-    private void receiveAzimuthPointAOA(double AOA_deg) {  // adds AOA point to the Queue for plotting
-        azimuthPointsAOA.add(new PointAOA(AOA_deg, PointAOA.Type.AZIMUTH));
+    private void receiveAzimuthPointAOA(Queue<Double> queue_AOA_deg) {  // adds AOA point to the Queue for plotting
+        for (double AOA_deg : queue_AOA_deg)
+            azimuthPointsAOA.add(new PointAOA(AOA_deg, PointAOA.Type.AZIMUTH));
     }
 
-    private void receiveElevationPointAOA(double AOA_deg) {  // adds AOA point to the Queue for plotting
-        elevationPointsAOA.add(new PointAOA(AOA_deg, PointAOA.Type.ELEVATION));
+    private void receiveElevationPointAOA(Queue<Double> queue_AOA_deg) {  // adds AOA point to the Queue for plotting
+        for (double AOA_deg : queue_AOA_deg)
+            elevationPointsAOA.add(new PointAOA(AOA_deg, PointAOA.Type.ELEVATION));
     }
 
     private final Handler uiHandler = new Handler(Looper.getMainLooper()); // UI handler on the main (UI) thread
@@ -114,15 +125,19 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
         resetBitmap();
         updateMarginalDistributionAzimuth();
         updateMarginalDistributionElevation();
+        updateRollingAverageCentroidAzimuth(centroidAOAAzimuth);
+        updateRollingAverageCentroidElevation(centroidAOAElevation);
         updatePlotGaussianEllipse();
         postCentroidAOASolution();
     }
 
+
+
     private void updatePlotGaussianEllipse() {
-        double meanAzimuthPx = convertAngleToPixels(new PointAOA(this.centroidAOAAzimuth, PointAOA.Type.AZIMUTH));
-        double meanElevationPx = convertAngleToPixels(new PointAOA(this.centroidAOAElevation, PointAOA.Type.ELEVATION));
-        double meanPlusOneSigmaAziPx = convertAngleToPixels(new PointAOA(this.centroidAOAAzimuth + this.sigmaAOAAzimuth, PointAOA.Type.AZIMUTH));
-        double meanPlusOneSigmaElevPx = convertAngleToPixels(new PointAOA(this.centroidAOAElevation + this.sigmaAOAElevation, PointAOA.Type.ELEVATION));
+        double meanAzimuthPx = convertAngleToPixels(new PointAOA(this.rollingCentroidAOAAzimuth, PointAOA.Type.AZIMUTH));
+        double meanElevationPx = convertAngleToPixels(new PointAOA(this.rollingCentroidAOAElevation, PointAOA.Type.ELEVATION));
+        double meanPlusOneSigmaAziPx = convertAngleToPixels(new PointAOA(this.rollingCentroidAOAAzimuth + this.sigmaAOAAzimuth, PointAOA.Type.AZIMUTH));
+        double meanPlusOneSigmaElevPx = convertAngleToPixels(new PointAOA(this.rollingCentroidAOAElevation + this.sigmaAOAElevation, PointAOA.Type.ELEVATION));
         drawGaussianSigma(this.canvas,
                 meanAzimuthPx,
                 meanElevationPx,
@@ -147,6 +162,20 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
         bounds2S.right = (float) (meanX_px + 2*sigmaX_px);
         bounds2S.bottom = (float) (meanY_px + 2*sigmaY_px);
 
+        // Create a RectF to define the bounds of the ellipse
+        RectF bounds0p5S = new RectF();
+        bounds0p5S.left = (float) (meanX_px - 0.5*sigmaX_px);
+        bounds0p5S.top = (float) (meanY_px - 0.5*sigmaY_px);
+        bounds0p5S.right = (float) (meanX_px + 0.5*sigmaX_px);
+        bounds0p5S.bottom = (float) (meanY_px + 0.5*sigmaY_px);
+
+        // Create a RectF to define the bounds of the ellipse
+        RectF bounds0p25S = new RectF();
+        bounds0p25S.left = (float) (meanX_px - 0.25*sigmaX_px);
+        bounds0p25S.top = (float) (meanY_px - 0.25*sigmaY_px);
+        bounds0p25S.right = (float) (meanX_px + 0.25*sigmaX_px);
+        bounds0p25S.bottom = (float) (meanY_px + 0.25*sigmaY_px);
+
         // Draw the ellipse on the canvas
         Paint paint = new Paint();
         paint.setColor(Color.GREEN);
@@ -162,6 +191,8 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
         paint.setPathEffect(dashPathEffect);
         canvas.drawOval(bounds1S, paint);
         canvas.drawOval(bounds2S, paint);
+        canvas.drawOval(bounds0p5S, paint);
+        canvas.drawOval(bounds0p25S, paint);
 
         // Draw the "X" at the mean position
         paint.setStrokeWidth(6);
@@ -173,13 +204,39 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
     private void postCentroidAOASolution() {  // Send centroid to Solution Fragment
         Handler handler = new Handler(Looper.getMainLooper());  // Post updates to LiveData on the main thread
         handler.post(() -> {
-            solutionViewModel.setCentroidAOAAzimuth(centroidAOAAzimuth);
-            solutionViewModel.setCentroidAOAElevation(centroidAOAElevation);
+            solutionViewModel.setCentroidAOAAzimuth(rollingCentroidAOAAzimuth);
+            solutionViewModel.setCentroidAOAElevation(rollingCentroidAOAElevation);
         });
     }
 
     private void resetBitmap() {
         bitmap.eraseColor(colorMap.getColorByIndex(0));
+    }
+
+    private void updateRollingAverageCentroidAzimuth(double newValue) {
+        if (Double.isNaN(newValue))
+            return;
+
+        // Average over time to reduce the number of updates to the GUI
+        rollingSumAzimuth += newValue - valueBufferAzimuth[bufferIndexAzimuth]; // Adjust rolling sum by subtracting the value leaving the buffer
+        valueBufferAzimuth[bufferIndexAzimuth] = newValue; // Store the new value in the circular buffer
+        bufferIndexAzimuth = (bufferIndexAzimuth + 1) % valueBufferAzimuth.length; // Increment buffer index in a circular manner
+
+        // Calculate the rolling average
+        rollingCentroidAOAAzimuth = rollingSumAzimuth / valueBufferAzimuth.length;
+    }
+
+    private void updateRollingAverageCentroidElevation(double newValue) {
+        if (Double.isNaN(newValue))
+            return;
+
+        // Average over time to reduce the number of updates to the GUI
+        rollingSumElevation += newValue - valueBufferElevation[bufferIndexElevation]; // Adjust rolling sum by subtracting the value leaving the buffer
+        valueBufferElevation[bufferIndexElevation] = newValue; // Store the new value in the circular buffer
+        bufferIndexElevation = (bufferIndexElevation + 1) % valueBufferElevation.length; // Increment buffer index in a circular manner
+
+        // Calculate the rolling average
+        rollingCentroidAOAElevation = rollingSumElevation / valueBufferElevation.length;
     }
 
     private void updateMarginalDistributionAzimuth() {

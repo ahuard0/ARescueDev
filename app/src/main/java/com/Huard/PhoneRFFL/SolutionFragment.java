@@ -3,6 +3,7 @@ package com.Huard.PhoneRFFL;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,11 +15,15 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 public class SolutionFragment extends Fragment {
 
     private TextView lblAzimuth;
     private TextView lblElevation;
     private SolutionViewModel solutionViewModel;
+    private final double FOV_DEG = 77;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -41,30 +46,44 @@ public class SolutionFragment extends Fragment {
         solutionViewModel.getCentroidAOAElevation().observe(getViewLifecycleOwner(), this::receiveCentroidAOAElevation);
 
         ChannelViewModel channelViewModel = new ViewModelProvider(requireActivity()).get(ChannelViewModel.class);
-        channelViewModel.getChannelDataAzimuth().observe(getViewLifecycleOwner(), this::receiveAzimuthADC);
-        channelViewModel.getChannelDataElevation().observe(getViewLifecycleOwner(), this::receiveElevationADC);
+        channelViewModel.getAzimuth().observe(getViewLifecycleOwner(), this::receiveAzimuthADC);
+        channelViewModel.getElevation().observe(getViewLifecycleOwner(), this::receiveElevationADC);
     }
 
-    private void receiveAzimuthADC(Pair<Integer, Integer> values) {
-        double Power_CH3 = convert_ADC_to_dBm(values.first,  3);
-        double Power_CH4 = convert_ADC_to_dBm(values.second, 4);
-        double delta_dB = Power_CH3 - Power_CH4;
-        double AOA_deg = convert_delta_dB_to_AOA(delta_dB);
-        solutionViewModel.setAzimuthPointAOA(AOA_deg);
+    private void receiveAzimuthADC(Queue<Pair<Short, Short>> pairQueue) {
+        Queue<Double> solutionQueue = new LinkedList<>();
+        for (Pair<Short, Short> values : pairQueue) {
+            double Power_CH3 = convert_ADC_to_dBm(values.first,  3);
+            double Power_CH4 = convert_ADC_to_dBm(values.second, 4);
+            double delta_dB = Power_CH3 - Power_CH4;
+            double AOA_deg = convert_delta_dB_to_AOA(delta_dB);
+            if (Math.abs(AOA_deg) <= FOV_DEG) {  // Limit AOA to within the Camera FOV
+                Log.d("SolutionFragment", "AOA: " + AOA_deg + "deg Azi, Azimuth: (" + values.first + ", " + values.second + ")");
+                solutionQueue.add(AOA_deg);
+            }
+        }
+        solutionViewModel.setAzimuthPointsAOA(solutionQueue);  // TODO: Save azimuth points to a file
     }
 
-    private void receiveElevationADC(Pair<Integer, Integer> values) {
-        double Power_CH1 = convert_ADC_to_dBm(values.first,  1);
-        double Power_CH2 = convert_ADC_to_dBm(values.second, 2);
-        double delta_dB = Power_CH1 - Power_CH2;
-        double AOA_deg = convert_delta_dB_to_AOA(delta_dB);
-        solutionViewModel.setElevationPointAOA(AOA_deg);
+    private void receiveElevationADC(Queue<Pair<Short, Short>> pairQueue) {
+        Queue<Double> solutionQueue = new LinkedList<>();
+        for (Pair<Short, Short> values : pairQueue) {
+            double Power_CH1 = convert_ADC_to_dBm(values.first, 1);
+            double Power_CH2 = convert_ADC_to_dBm(values.second, 2);
+            double delta_dB = Power_CH1 - Power_CH2;
+            double AOA_deg = convert_delta_dB_to_AOA(delta_dB);
+            if (Math.abs(AOA_deg) <= FOV_DEG) {  // Limit AOA to within the Camera FOV
+                Log.d("SolutionFragment", "AOA: " + AOA_deg + "deg El, Elevation: (" + values.first + ", " + values.second + ")");
+                solutionQueue.add(AOA_deg);
+            }
+        }
+        solutionViewModel.setElevationPointsAOA(solutionQueue);  // TODO: Save elevation points to a file
     }
 
     private double convert_delta_dB_to_AOA(double delta_dB) {
-        // dbm12diff = -0.1462 * AOAResult + 0.0000
-        // dbm34diff = -0.1462 * AOAResult + 0.0000
-        return delta_dB/(-0.1462);
+        // dbm12diff = 0.1462 * AOAResult + 0.0000
+        // dbm34diff = 0.1462 * AOAResult + 0.0000
+        return delta_dB/(0.1462);
     }
 
     private double convert_ADC_to_dBm(int ADC_value, int channel) {
@@ -95,7 +114,7 @@ public class SolutionFragment extends Fragment {
     }
 
     private void receiveCentroidAOAElevation(double value) {
-        setAOASolutionElevationText(value);
+        setAOASolutionElevationText(value);  // TODO: Make this an average over time to reduce the number of updates to the GUI
     }
 
     private void receiveShowAOAMode(boolean isCentroidSelected) {

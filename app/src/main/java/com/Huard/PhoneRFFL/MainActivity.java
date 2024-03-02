@@ -27,6 +27,8 @@ public class MainActivity extends AppCompatActivity {
         initializeSolutionFragment();
         initializeConnectionFragment();
         initializeSimulationFragment();
+        initializeFilterFragment();
+        initializeTerminalFragment();
     }
 
 
@@ -36,6 +38,12 @@ public class MainActivity extends AppCompatActivity {
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
 
         setContentView(R.layout.activity_main);
+    }
+
+    private void initializeFilterFragment() {  // Show SimulationFragment
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_filter_container, new FilterFragment())
+                .commit();
     }
 
     private void initializeSimulationFragment() {  // Show SimulationFragment
@@ -71,6 +79,12 @@ public class MainActivity extends AppCompatActivity {
     private void initializeConnectionFragment() {  // Show SolutionFragment
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_connection_container, new ConnectionFragment())
+                .commit();
+    }
+
+    private void initializeTerminalFragment() {  // Show SolutionFragment
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_terminal_container, new TerminalFragment())
                 .commit();
     }
 }

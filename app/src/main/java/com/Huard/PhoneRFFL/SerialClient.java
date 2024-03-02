@@ -14,14 +14,12 @@ import android.hardware.usb.UsbManager;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
-
 import java.util.HashMap;
 import java.util.Objects;
 
 
-public class SerialClient implements AutoCloseable {
+public class SerialClient implements AutoCloseable, SerialDataListener {
     public static final String ACTION_USB_PERMISSION = "com.Huard.PhoneRFFL.USB_PERMISSION";
     private static PendingIntent intentPermissionUSB;
     private static final int[] USB_VENDOR_IDs = {9025, 10755}; // Arduino
@@ -34,13 +32,14 @@ public class SerialClient implements AutoCloseable {
     public static UsbInterface usbInterface;
     public static SerialMonitor monitor;
     public static SerialClient client;
-
     public static Handler terminalHandler;
     public static Handler connectionHandler;
+    public boolean verbose;
 
-    public SerialClient(@NonNull Context context, Handler terminalHandler, Handler connectionHandler) {
+    public SerialClient(@NonNull Context context, Handler terminalHandler, Handler connectionHandler, boolean verbose) {
         SerialClient.terminalHandler = terminalHandler;
         SerialClient.connectionHandler = connectionHandler;
+        this.verbose = verbose;
         client = this;
 
         manager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
@@ -267,5 +266,15 @@ public class SerialClient implements AutoCloseable {
             updateConnectionStatus("Disconnected");
             updateTerminalStatus("Closed Connection");
         }
+    }
+
+    public void onMessageReceived(String message) {
+        if (verbose)
+            Log.d("SerialClient", "Message Received: " + message);
+        if (terminalHandler == null)
+            return;
+        Message msg = terminalHandler.obtainMessage();
+        msg.obj = message;
+        terminalHandler.sendMessage(msg);
     }
 }

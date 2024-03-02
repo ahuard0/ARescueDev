@@ -17,10 +17,12 @@ public class ChartManager {
     private final LineChart lineChart;
     private LineDataSet dataSet;
     private int count = 0;  // Create a counter to track the x-axis value
+    private final int channel;  // limit display to one channel 0:3
     private static final int MAX_DATA_POINTS = 300;
 
-    public ChartManager(LineChart lineChart) {
+    public ChartManager(LineChart lineChart, int channel) {
         this.lineChart = lineChart;
+        this.channel = channel;
     }
 
     public void updateChart(String msg) {
@@ -52,8 +54,11 @@ public class ChartManager {
             }
 
             try {
-                //float pin = Float.parseFloat(pins[0]);
+                float pin = Float.parseFloat(pins[0]);
                 float value = Float.parseFloat(values[0]);
+
+                if (pin != channel-1)  // limit to only channel 3
+                    return;
 
                 // Get the entries list for the current pin
                 List<Entry> pinEntries = dataSet.getValues();
@@ -97,7 +102,7 @@ public class ChartManager {
     }
 
     private void initializeChart() {
-        dataSet = new LineDataSet(new ArrayList<>(), "Pin 0");
+        dataSet = new LineDataSet(new ArrayList<>(), "Pin");
 
         // Customize the attributes of the LineDataSet
         dataSet.setColor(Color.GREEN);

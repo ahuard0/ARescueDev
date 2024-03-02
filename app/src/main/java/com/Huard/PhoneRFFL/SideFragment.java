@@ -14,6 +14,8 @@ import androidx.lifecycle.ViewModelProvider;
 
 public class SideFragment extends Fragment {
     @SuppressLint("UseSwitchCompatOrMaterialCode")
+    public Switch chkFilter;
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
     public Switch chkHaptics;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     public Switch chkEllipse;
@@ -36,13 +38,19 @@ public class SideFragment extends Fragment {
         chkShowCentroidAOA = view.findViewById(R.id.chkShowAOA);
         chkEllipse = view.findViewById(R.id.chkEllipse);
         chkHaptics = view.findViewById(R.id.chkHaptics);
+        chkFilter = view.findViewById(R.id.chkFilter);
 
         chkShowWidgets.setOnClickListener(v -> onPressChkShowWidgets());
         chkShowCentroidAOA.setOnClickListener(v -> onPressChkShowCentroidAOA());
         chkEllipse.setOnClickListener(v -> onPressChkEllipse());
         chkHaptics.setOnClickListener(v -> onPressChkHaptics());
+        chkFilter.setOnClickListener(v -> onPressChkFilter());
 
         sideViewModel = new ViewModelProvider(requireActivity()).get(SideViewModel.class);
+    }
+
+    private void onPressChkFilter() {
+        sideViewModel.setFilterSelected(chkFilter.isChecked());
     }
 
     private void onPressChkShowWidgets() {

@@ -26,7 +26,7 @@ public class AndroidSerialMainActivity extends AppCompatActivity implements Stat
         setContentView(R.layout.android_serial_activity_main);
 
         LineChart lineChart = findViewById(R.id.lineChart);  // get the line chart from the XML file
-        chartManager = new ChartManager(lineChart);
+        chartManager = new ChartManager(lineChart, 3);
         connectionManager = new ConnectionManager(this, statusTerminalHandler, statusConnectionHandler);
 
         initialize();

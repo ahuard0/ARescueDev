@@ -6,30 +6,18 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import java.util.LinkedList;
 import java.util.Queue;
 
-public class ChannelViewModel extends ViewModel {
+public class FilterViewModel extends ViewModel {
     private final MutableLiveData<Queue<Pair<Short, Short>>> azimuth = new MutableLiveData<>();
     private final MutableLiveData<Queue<Pair<Short, Short>>> elevation = new MutableLiveData<>();
 
-    public void setAzimuth(Pair<Short, Short> value) {
-        Queue<Pair<Short, Short>> pairQueue = new LinkedList<>();
-        pairQueue.offer(value);
-        azimuth.postValue(pairQueue);
-    }
     public void setAzimuth(Queue<Pair<Short, Short>> value) {
         azimuth.postValue(value);
     }
 
     public LiveData<Queue<Pair<Short, Short>>> getAzimuth() {
         return azimuth;
-    }
-
-    public void setElevation(Pair<Short, Short> value) {
-        Queue<Pair<Short, Short>> pairQueue = new LinkedList<>();
-        pairQueue.offer(value);
-        elevation.postValue(pairQueue);
     }
 
     public void setElevation(Queue<Pair<Short, Short>> value) {

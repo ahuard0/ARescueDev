@@ -4,11 +4,13 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import java.util.Queue;
+
 public class SolutionViewModel extends ViewModel {
     private final MutableLiveData<Double> centroidAOAAzi = new MutableLiveData<>();
     private final MutableLiveData<Double> centroidAOAEl = new MutableLiveData<>();
-    private final MutableLiveData<Double> azimuthPointAOA = new MutableLiveData<>();
-    private final MutableLiveData<Double> elevationPointAOA = new MutableLiveData<>();
+    private final MutableLiveData<Queue<Double>> azimuthPointsAOA = new MutableLiveData<>();
+    private final MutableLiveData<Queue<Double>> elevationPointsAOA = new MutableLiveData<>();
 
     public void setCentroidAOAAzimuth(Double value) {
         centroidAOAAzi.postValue(value);
@@ -25,19 +27,19 @@ public class SolutionViewModel extends ViewModel {
         return centroidAOAEl;
     }
 
-    public void setAzimuthPointAOA(Double value) {
-        azimuthPointAOA.postValue(value);
+    public void setAzimuthPointsAOA(Queue<Double> values) {
+        azimuthPointsAOA.postValue(values);
     }
 
-    public LiveData<Double> getAzimuthPointAOA() {
-        return azimuthPointAOA;
+    public LiveData<Queue<Double>> getAzimuthPointsAOA() {
+        return azimuthPointsAOA;
     }
 
-    public void setElevationPointAOA(Double value) {
-        elevationPointAOA.postValue(value);
+    public void setElevationPointsAOA(Queue<Double> values) {
+        elevationPointsAOA.postValue(values);
     }
 
-    public LiveData<Double> getElevationPointAOA() {
-        return elevationPointAOA;
+    public LiveData<Queue<Double>> getElevationPointsAOA() {
+        return elevationPointsAOA;
     }
 }

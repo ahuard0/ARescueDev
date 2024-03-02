@@ -31,6 +31,19 @@
             android:layout_marginBottom="16dp"
             android:minHeight="48dp"
             android:text="@string/haptics"
+            app:layout_constraintBottom_toTopOf="@+id/chkFilter"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+        <Switch
+            android:id="@+id/chkFilter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:checked="false"
+            android:minHeight="48dp"
+            android:text="@string/filter"
             app:layout_constraintBottom_toTopOf="@+id/chkEllipse"
             app:layout_constraintEnd_toEndOf="parent"
             tools:ignore="UseSwitchCompatOrMaterialXml" />

@@ -1,6 +1,7 @@
 package com.Huard.PhoneRFFL;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,10 +14,14 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class TerminalFragment extends Fragment {
-    private ChannelViewModel channelViewModel;
+    private FilterViewModel filterViewModel;
     private TextView lblTerminal;
+    private final Queue<Pair<Short, Short>> dataQueueAzimuth = new LinkedList<>();
+    private final Queue<Pair<Short, Short>> dataQueueElevation = new LinkedList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -32,23 +37,44 @@ public class TerminalFragment extends Fragment {
         ConnectionViewModel connectionViewModel = new ViewModelProvider(requireActivity()).get(ConnectionViewModel.class);
         connectionViewModel.getTerminalMsg().observe(getViewLifecycleOwner(), this::receiveTerminalMessage);
 
-        channelViewModel = new ViewModelProvider(requireActivity()).get(ChannelViewModel.class);
+        filterViewModel = new ViewModelProvider(requireActivity()).get(FilterViewModel.class);
     }
 
-    private void receiveTerminalMessage(String message) {
-        Triplet<ArrayList<Integer>, TerminalManager.MeasurementType, Integer> data = TerminalManager.parseMessage(message);
-        if (data == null) {
-            setTerminalStatus("No Data");
-        } else {
-            setTerminalStatus(message);
-            if (data.second == TerminalManager.MeasurementType.AZIMUTH)
-                channelViewModel.setChannelDataAzimuth(new Pair<>(data.first.get(0), data.first.get(1)));
-            else if (data.second == TerminalManager.MeasurementType.ELEVATION)
-                channelViewModel.setChannelDataElevation(new Pair<>(data.first.get(0), data.first.get(1)));
+    private void receiveTerminalMessage(Queue<String> messageQueue) {
+        if (messageQueue.isEmpty())
+            return;
+
+        dataQueueAzimuth.clear();
+        dataQueueElevation.clear();
+
+        for (String message : messageQueue) {
+            Log.d("TerminalFragment", "Message Received: " + message);
+            Triplet<ArrayList<Short>, TerminalManager.MeasurementType, Integer> data = TerminalManager.parseMessage(message);
+
+            if (data == null) {
+                setTerminalStatus("No Data");
+            } else {
+                setTerminalStatus("");
+                if (data.second == TerminalManager.MeasurementType.AZIMUTH)
+                    dataQueueAzimuth.offer(new Pair<>(data.first.get(0), data.first.get(1)));  // data.first : [ch3,ch4] azimuth
+                else if (data.second == TerminalManager.MeasurementType.ELEVATION)
+                    dataQueueElevation.offer(new Pair<>(data.first.get(0), data.first.get(1)));  // data.first : [ch1,ch2] elevation
+            }
         }
+
+        if (!dataQueueAzimuth.isEmpty())
+            filterViewModel.setAzimuth(new LinkedList<>(dataQueueAzimuth));
+
+        if (!dataQueueElevation.isEmpty())
+            filterViewModel.setElevation(new LinkedList<>(dataQueueElevation));
     }
 
     private void setTerminalStatus(String msg) {
+        if (msg == null)
+            return;
+        if (lblTerminal == null)
+            return;
+
         lblTerminal.setText(msg);
     }
 }

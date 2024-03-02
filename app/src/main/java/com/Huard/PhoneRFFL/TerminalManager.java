@@ -10,7 +10,15 @@ public class TerminalManager {
         UNDETERMINED
     }
 
-    public static Triplet<ArrayList<Integer>, MeasurementType, Integer> parseMessage(String message) {
+    public static int calculateChecksum(String str) {
+        int sum = 0;
+        for (int i = 0; i < str.length(); i++) {
+            sum += str.charAt(i);
+        }
+        return sum;
+    }
+
+    public static Triplet<ArrayList<Short>, MeasurementType, Integer> parseMessage(String message) {
         // Message will be of the form: #|1234|MON|10|3,4|123,573|4312
         //      # is a delimiter.
         //      1234 is a index.
@@ -19,10 +27,25 @@ public class TerminalManager {
         //      3,4 represents a list of monitored channels.
         //      123,573 represents the corresponding ADC data.
         //      4312 is a checksum of the message string
+        if (message.charAt(0) != '#')
+            return null;
 
-        ArrayList<Integer> adcData = new ArrayList<>(2);
-        ArrayList<Integer> adcChan = new ArrayList<>(2);
         String[] parts = message.split("\\|");
+
+        if (parts.length != 7)
+            return null;
+
+        // Step 0:  Compute Checksum
+        String checksumStr = parts[6];
+        checksumStr = checksumStr.replaceAll("[^0-9]", "");
+        if (checksumStr.length() == 0)
+            return null;
+
+        int checksum = Integer.parseInt(checksumStr);
+        int computedChecksum = TerminalManager.calculateChecksum(message.substring(0, message.lastIndexOf('|')));
+        if (computedChecksum != checksum) {
+            return null; // Checksum mismatch
+        }
 
         // Step 1:  Parse Index Number
         String indexNumber = parts[1];
@@ -30,12 +53,18 @@ public class TerminalManager {
 
         // Step 2:  Parse message identifier token
         String identifier = parts[2];
+        if (identifier.length() == 0)
+            return null;
+        ArrayList<Short> adcData = new ArrayList<>(2);
+        ArrayList<Short> adcChan = new ArrayList<>(2);
         if (identifier.equals("MON")) {
 
             // Step 3:  Parse channel numbers
             String[] channelNumbers = parts[4].split(",");
             for (String value : channelNumbers) {
-                adcChan.add(Integer.parseInt(value));
+                if (value.length() == 0)
+                    return null;
+                adcChan.add(Short.parseShort(value));
             }
 
             // Step 4: Determine Azimuth or Elevation
@@ -45,13 +74,17 @@ public class TerminalManager {
             } else if (adcChan.get(0)==0 && adcChan.get(1)==1) {
                 measurementType = MeasurementType.ELEVATION;
             } else {
-                measurementType = MeasurementType.UNDETERMINED;
+                return null;
             }
 
             // Step 5: Parse ADC Data
             String[] adcValues = parts[5].split(",");
+            if (adcValues.length < 2)
+                return null;
             for (String value : adcValues) {
-                adcData.add(Integer.parseInt(value));
+                if (value.length() == 0)
+                    return null;
+                adcData.add(Short.parseShort(value));
             }
 
             return new Triplet<>(adcData, measurementType, index);

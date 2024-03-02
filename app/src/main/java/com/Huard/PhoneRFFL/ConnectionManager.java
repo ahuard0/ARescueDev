@@ -18,7 +18,7 @@ public class ConnectionManager {
 
     public void connect() {
         if (client == null)
-            client = new SerialClient(applicationContext, statusTerminalHandler, statusConnectionHandler);
+            client = new SerialClient(applicationContext, statusTerminalHandler, statusConnectionHandler, false);
     }
 
     public void disconnect() {

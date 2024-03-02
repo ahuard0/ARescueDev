@@ -10,15 +10,21 @@ import androidx.lifecycle.ViewModelProvider;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 public class ConnectionFragment extends Fragment {
     private ConnectionManager connectionManager;
     private ConnectionViewModel connectionViewModel;
     private ImageView connectionStatusIndicator;
+    private final Queue<String> messageQueue = new LinkedList<>();
+    private static final int BATCH_SIZE = 20;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -42,6 +48,7 @@ public class ConnectionFragment extends Fragment {
         @Override
         public void handleMessage(Message msg) {
             String message = (String) msg.obj;
+            Log.d("ConnectionFragment", "handleMessage Message: " + msg);
             connectionViewModel.setConnectionStatusMsg(message);
             if (message != null && message.equals("Connected")) {
                 setConnectionStatusIndicator(true);
@@ -57,9 +64,26 @@ public class ConnectionFragment extends Fragment {
         @Override
         public void handleMessage(Message msg) {
             String message = (String) msg.obj;
-            connectionViewModel.setTerminalMsg(message);
+            //Log.d("ConnectionFragment", "Message: " + message);
+            addToMessageQueue(message);  // Add the received message to the message queue
         }
     };
+
+    private synchronized void addToMessageQueue(String message) {
+        messageQueue.offer(message); // Add message to the end of the queue
+
+        // Process the message queue if it reaches the batch size
+        if (messageQueue.size() >= BATCH_SIZE) {
+            processMessageQueue();
+        }
+    }
+
+    private final Runnable processMessageQueueRunnable = this::processMessageQueue;
+
+    private synchronized void processMessageQueue() {
+        connectionViewModel.setTerminalMsg(new LinkedList<>(messageQueue));  // Pass the message queue to the ViewModel
+        messageQueue.clear();
+    }
 
     private void setConnectionStatusIndicator(boolean isConnected) {
         if (isConnected) {

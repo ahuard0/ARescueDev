@@ -29,7 +29,9 @@
     <string name="single_read">Single Read</string>
     <string name="visualizer">Visualizer</string>
     <string name="connection_status_indicator">Connection Status Indicator</string>
-    <string name="terminal">Terminal Message</string>
+    <string name="terminal">No Data</string>
     <string name="simulated">Simulated</string>
     <string name="show_widgets">Widgets</string>
+    <string name="filtered">Filtered</string>
+    <string name="filter">Filter</string>
 </resources>

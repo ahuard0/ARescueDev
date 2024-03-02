@@ -9,6 +9,16 @@ public class SideViewModel extends ViewModel {
     private final MutableLiveData<Boolean> centroidAOASelected = new MutableLiveData<>();
     private final MutableLiveData<Boolean> hapticsSelected = new MutableLiveData<>();
     private final MutableLiveData<Boolean> ellipseSelected = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> filterSelected = new MutableLiveData<>();
+
+
+    public void setFilterSelected(Boolean value) {
+        filterSelected.setValue(value);
+    }
+
+    public LiveData<Boolean> getFilterSelected() {
+        return filterSelected;
+    }
 
     public void setWidgetsSelected(Boolean value) {
         widgetsSelected.setValue(value);
