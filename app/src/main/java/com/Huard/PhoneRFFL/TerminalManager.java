@@ -6,8 +6,7 @@ public class TerminalManager {
 
     public enum MeasurementType {
         AZIMUTH,
-        ELEVATION,
-        UNDETERMINED
+        ELEVATION
     }
 
     public static int calculateChecksum(String str) {
@@ -38,7 +37,7 @@ public class TerminalManager {
         // Step 0:  Compute Checksum
         String checksumStr = parts[6];
         checksumStr = checksumStr.replaceAll("[^0-9]", "");
-        if (checksumStr.length() == 0)
+        if (checksumStr.isEmpty())
             return null;
 
         int checksum = Integer.parseInt(checksumStr);
@@ -53,7 +52,7 @@ public class TerminalManager {
 
         // Step 2:  Parse message identifier token
         String identifier = parts[2];
-        if (identifier.length() == 0)
+        if (identifier.isEmpty())
             return null;
         ArrayList<Short> adcData = new ArrayList<>(2);
         ArrayList<Short> adcChan = new ArrayList<>(2);
@@ -62,7 +61,7 @@ public class TerminalManager {
             // Step 3:  Parse channel numbers
             String[] channelNumbers = parts[4].split(",");
             for (String value : channelNumbers) {
-                if (value.length() == 0)
+                if (value.isEmpty())
                     return null;
                 adcChan.add(Short.parseShort(value));
             }
@@ -82,7 +81,7 @@ public class TerminalManager {
             if (adcValues.length < 2)
                 return null;
             for (String value : adcValues) {
-                if (value.length() == 0)
+                if (value.isEmpty())
                     return null;
                 adcData.add(Short.parseShort(value));
             }

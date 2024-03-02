@@ -4,6 +4,7 @@ plugins {
 
 android {
     namespace 'com.Huard.PhoneRFFL'
+    //noinspection GradleDependency
     compileSdk 33
 
     defaultConfig {

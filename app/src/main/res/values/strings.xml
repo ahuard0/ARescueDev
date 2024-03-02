@@ -34,4 +34,5 @@
     <string name="show_widgets">Widgets</string>
     <string name="filtered">Filtered</string>
     <string name="filter">Filter</string>
+    <string name="logging">Logging</string>
 </resources>

@@ -1,12 +1,6 @@
 package com.Huard.PhoneRFFL;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.os.Looper;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -14,10 +8,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
 public class SimulationFragment extends Fragment {
     private boolean isConnected = false;  // loop through synthetic data if not connected
     public TextView lblSimulation;
+    public TextView lblLogging;
     private ChannelViewModel channelViewModel;
+    private LoggingViewModel loggingViewModel;
     short[][] ADC_Values_Azimuth;
     short[][] ADC_Values_Elevation;
     private final long samplePeriod_msec = 20;
@@ -33,13 +34,22 @@ public class SimulationFragment extends Fragment {
 
         lblSimulation = view.findViewById(R.id.lblSimulation);
 
+        lblLogging = view.findViewById(R.id.lblLogging);
+        lblLogging.setOnClickListener(v -> onPressBtnLogging());
+
         channelViewModel = new ViewModelProvider(requireActivity()).get(ChannelViewModel.class);
 
         ConnectionViewModel connectionViewModel = new ViewModelProvider(requireActivity()).get(ConnectionViewModel.class);
         connectionViewModel.getIsConnected().observe(getViewLifecycleOwner(), this::receiveIsConnected);
 
+        loggingViewModel = new ViewModelProvider(requireActivity()).get(LoggingViewModel.class);
+
         initializeSyntheticData();
         LoopSyntheticData();
+    }
+
+    public void onPressBtnLogging() {
+        loggingViewModel.setLogExportSelected(true);
     }
 
     private void receiveIsConnected(boolean isConnected) {

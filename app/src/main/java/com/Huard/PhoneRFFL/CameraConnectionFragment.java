@@ -215,7 +215,7 @@ public class CameraConnectionFragment extends Fragment {
         }
 
         // Pick the smallest of those, assuming we found any
-        if (bigEnough.size() > 0) {
+        if (!bigEnough.isEmpty()) {
             // LOGGER.i("Chosen size: " + chosenSize.getWidth() + "x" + chosenSize.getHeight());
             return Collections.min(bigEnough, new CompareSizesByArea());
         } else {

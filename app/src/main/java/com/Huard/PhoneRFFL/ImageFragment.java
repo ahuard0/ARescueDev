@@ -1,6 +1,7 @@
 package com.Huard.PhoneRFFL;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -14,6 +15,7 @@ import android.media.ImageReader;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +32,9 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class ImageFragment extends Fragment implements ImageReader.OnImageAvailableListener {
+    private Context mContext;
+    private boolean isConnected = false;
+    public StorageManager storageManager;
     public ImageView imageView;
     private SolutionViewModel solutionViewModel;
     private final Canvas canvas;
@@ -55,6 +60,12 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
     public ImageFragment() {
         canvas = new Canvas(bitmap);
         resetBitmap(); // initial bitmap coloring (transparent and almost invisible)
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        mContext = context;
     }
 
     @Nullable
@@ -84,14 +95,42 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
         SideViewModel sideViewModel = new ViewModelProvider(requireActivity()).get(SideViewModel.class);
         sideViewModel.getEllipseSelected().observe(getViewLifecycleOwner(), this::receiveEllipseSelector);
 
+        LoggingViewModel loggingViewModel = new ViewModelProvider(requireActivity()).get(LoggingViewModel.class);
+        loggingViewModel.getLogExportSelected().observe(getViewLifecycleOwner(), this::receiveLoggingExportCommand);
+
+        ConnectionViewModel connectionViewModel = new ViewModelProvider(requireActivity()).get(ConnectionViewModel.class);
+        connectionViewModel.getIsConnected().observe(getViewLifecycleOwner(), this::receiveIsConnected);
+
         solutionViewModel = new ViewModelProvider(requireActivity()).get(SolutionViewModel.class);
         solutionViewModel.getAzimuthPointsAOA().observe(getViewLifecycleOwner(), this::receiveAzimuthPointAOA);
         solutionViewModel.getElevationPointsAOA().observe(getViewLifecycleOwner(), this::receiveElevationPointAOA);
+
+        storageManager = new StorageManager(mContext);
     }
 
     @Override
     public void onImageAvailable(ImageReader imageReader) {  /* Necessary for smooth camera updates */
         imageReader.acquireLatestImage().close();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Pass the result to StorageManager for handling
+        if (storageManager != null) {
+            storageManager.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    /** @noinspection unused*/
+    private void receiveLoggingExportCommand(Boolean value) {
+        Log.d("ImageFragment", "Exporting Log Telemetry Data");
+        storageManager.exportTelemetryData();
+    }
+
+    private void receiveIsConnected(boolean isConnected) {
+        this.isConnected = isConnected;
     }
 
     private void receiveAzimuthPointAOA(Queue<Double> queue_AOA_deg) {  // adds AOA point to the Queue for plotting
@@ -129,15 +168,22 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
         updateRollingAverageCentroidElevation(centroidAOAElevation);
         updatePlotGaussianEllipse();
         postCentroidAOASolution();
+        if (isConnected)  // do not log simulated data
+            logToFileCentroidAOASolution(rollingCentroidAOAAzimuth, rollingCentroidAOAElevation);
+    }
+
+    private void logToFileCentroidAOASolution(double azimuth, double elevation) {
+        long timestamp = System.currentTimeMillis();
+        String data = timestamp + "," + azimuth + "," + elevation + "\n";
+        storageManager.saveDataToExternalStorage(data);
     }
 
 
-
     private void updatePlotGaussianEllipse() {
-        double meanAzimuthPx = convertAngleToPixels(new PointAOA(this.rollingCentroidAOAAzimuth, PointAOA.Type.AZIMUTH));
-        double meanElevationPx = convertAngleToPixels(new PointAOA(this.rollingCentroidAOAElevation, PointAOA.Type.ELEVATION));
-        double meanPlusOneSigmaAziPx = convertAngleToPixels(new PointAOA(this.rollingCentroidAOAAzimuth + this.sigmaAOAAzimuth, PointAOA.Type.AZIMUTH));
-        double meanPlusOneSigmaElevPx = convertAngleToPixels(new PointAOA(this.rollingCentroidAOAElevation + this.sigmaAOAElevation, PointAOA.Type.ELEVATION));
+        double meanAzimuthPx = convertAngleToPixels(new PointAOA(rollingCentroidAOAAzimuth, PointAOA.Type.AZIMUTH));
+        double meanElevationPx = convertAngleToPixels(new PointAOA(rollingCentroidAOAElevation, PointAOA.Type.ELEVATION));
+        double meanPlusOneSigmaAziPx = convertAngleToPixels(new PointAOA(rollingCentroidAOAAzimuth + sigmaAOAAzimuth, PointAOA.Type.AZIMUTH));
+        double meanPlusOneSigmaElevPx = convertAngleToPixels(new PointAOA(rollingCentroidAOAElevation + sigmaAOAElevation, PointAOA.Type.ELEVATION));
         drawGaussianSigma(this.canvas,
                 meanAzimuthPx,
                 meanElevationPx,

@@ -78,8 +78,6 @@ public class ConnectionFragment extends Fragment {
         }
     }
 
-    private final Runnable processMessageQueueRunnable = this::processMessageQueue;
-
     private synchronized void processMessageQueue() {
         connectionViewModel.setTerminalMsg(new LinkedList<>(messageQueue));  // Pass the message queue to the ViewModel
         messageQueue.clear();
