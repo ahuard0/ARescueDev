@@ -56,9 +56,9 @@ public class TerminalFragment extends Fragment {
             } else {
                 setTerminalStatus("");
                 if (data.second == TerminalManager.MeasurementType.AZIMUTH)
-                    dataQueueAzimuth.offer(new Pair<>(data.first.get(0), data.first.get(1)));  // data.first : [ch3,ch4] azimuth
+                    dataQueueAzimuth.offer(new Pair<>(data.first.get(0), data.first.get(1)));  // data.first : [chA,chB] azimuth
                 else if (data.second == TerminalManager.MeasurementType.ELEVATION)
-                    dataQueueElevation.offer(new Pair<>(data.first.get(0), data.first.get(1)));  // data.first : [ch1,ch2] elevation
+                    dataQueueElevation.offer(new Pair<>(data.first.get(0), data.first.get(1)));  // data.first : [chA,chB] elevation
             }
         }
 

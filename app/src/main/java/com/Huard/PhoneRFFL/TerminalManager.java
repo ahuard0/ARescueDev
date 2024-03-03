@@ -68,10 +68,10 @@ public class TerminalManager {
 
             // Step 4: Determine Azimuth or Elevation
             MeasurementType measurementType;
-            if (adcChan.get(0)==2 && adcChan.get(1)==3) {
-                measurementType = MeasurementType.AZIMUTH;
-            } else if (adcChan.get(0)==0 && adcChan.get(1)==1) {
+            if (adcChan.get(0)==SolutionFragment.CHANNEL_UP-1 && adcChan.get(1)==SolutionFragment.CHANNEL_DOWN-1) {
                 measurementType = MeasurementType.ELEVATION;
+            } else if (adcChan.get(0)==SolutionFragment.CHANNEL_LEFT-1 && adcChan.get(1)==SolutionFragment.CHANNEL_RIGHT-1) {
+                measurementType = MeasurementType.AZIMUTH;
             } else {
                 return null;
             }

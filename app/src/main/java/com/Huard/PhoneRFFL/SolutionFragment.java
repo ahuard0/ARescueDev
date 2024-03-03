@@ -23,7 +23,13 @@ public class SolutionFragment extends Fragment {
     private TextView lblAzimuth;
     private TextView lblElevation;
     private SolutionViewModel solutionViewModel;
-    private final double FOV_DEG = 77;
+    private static final double FOV_DEG = 77;
+    public static final int CHANNEL_UP = 3;
+    public static final int CHANNEL_DOWN = 4;
+    public static final int CHANNEL_LEFT = 1;
+    public static final int CHANNEL_RIGHT = 2;
+    private static final double CORR_FACTOR_DELTA_dB_CH34 = -2.21188;
+    private static final double CORR_FACTOR_DELTA_dB_CH12 = -0.96048;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -53,37 +59,45 @@ public class SolutionFragment extends Fragment {
     private void receiveAzimuthADC(Queue<Pair<Short, Short>> pairQueue) {
         Queue<Double> solutionQueue = new LinkedList<>();
         for (Pair<Short, Short> values : pairQueue) {
-            double Power_CH3 = convert_ADC_to_dBm(values.first,  3);
-            double Power_CH4 = convert_ADC_to_dBm(values.second, 4);
-            double delta_dB = Power_CH3 - Power_CH4;
+            double Power_CHa = convert_ADC_to_dBm(values.first, CHANNEL_LEFT);
+            double Power_CHb = convert_ADC_to_dBm(values.second, CHANNEL_RIGHT);
+            double delta_dB = Power_CHa - Power_CHb;
+
+            // Apply correction factor:  -0.96048 dB  (bottom channel #2 has this additional loss relative to the top channel #1)
+            delta_dB -= CORR_FACTOR_DELTA_dB_CH12;  // When equal power applied through splitter without correction: delta dB = +0.96 dB
+
             double AOA_deg = convert_delta_dB_to_AOA(delta_dB);
             if (Math.abs(AOA_deg) <= FOV_DEG) {  // Limit AOA to within the Camera FOV
                 Log.d("SolutionFragment", "AOA: " + AOA_deg + "deg Azi, Azimuth: (" + values.first + ", " + values.second + ")");
                 solutionQueue.add(AOA_deg);
             }
         }
-        solutionViewModel.setAzimuthPointsAOA(solutionQueue);  // TODO: Save azimuth points to a file
+        solutionViewModel.setAzimuthPointsAOA(solutionQueue);
     }
 
     private void receiveElevationADC(Queue<Pair<Short, Short>> pairQueue) {
         Queue<Double> solutionQueue = new LinkedList<>();
         for (Pair<Short, Short> values : pairQueue) {
-            double Power_CH1 = convert_ADC_to_dBm(values.first, 1);
-            double Power_CH2 = convert_ADC_to_dBm(values.second, 2);
-            double delta_dB = Power_CH1 - Power_CH2;
+            double Power_CHa = convert_ADC_to_dBm(values.first,  CHANNEL_UP);
+            double Power_CHb = convert_ADC_to_dBm(values.second, CHANNEL_DOWN);
+            double delta_dB = Power_CHa - Power_CHb;
+
+            // Apply correction factor:  -2.21188 dB  (right channel #4 has this additional loss relative to the left channel #3)
+            delta_dB -= CORR_FACTOR_DELTA_dB_CH34;  // When equal power applied through splitter without correction: delta dB = +2.21188 dB
+
             double AOA_deg = convert_delta_dB_to_AOA(delta_dB);
             if (Math.abs(AOA_deg) <= FOV_DEG) {  // Limit AOA to within the Camera FOV
                 Log.d("SolutionFragment", "AOA: " + AOA_deg + "deg El, Elevation: (" + values.first + ", " + values.second + ")");
                 solutionQueue.add(AOA_deg);
             }
         }
-        solutionViewModel.setElevationPointsAOA(solutionQueue);  // TODO: Save elevation points to a file
+        solutionViewModel.setElevationPointsAOA(solutionQueue);
     }
 
     private double convert_delta_dB_to_AOA(double delta_dB) {
-        // dbm12diff = 0.1462 * AOAResult + 0.0000
-        // dbm34diff = 0.1462 * AOAResult + 0.0000
-        return delta_dB/(0.1462);
+        // dbm12diff = -0.1462 * AOAResult + 0.0000
+        // dbm34diff = -0.1462 * AOAResult + 0.0000
+        return delta_dB/(-0.1462);
     }
 
     private double convert_ADC_to_dBm(int ADC_value, int channel) {
@@ -114,7 +128,7 @@ public class SolutionFragment extends Fragment {
     }
 
     private void receiveCentroidAOAElevation(double value) {
-        setAOASolutionElevationText(value);  // TODO: Make this an average over time to reduce the number of updates to the GUI
+        setAOASolutionElevationText(value);
     }
 
     private void receiveShowAOAMode(boolean isCentroidSelected) {

@@ -78,10 +78,6 @@ public class FilterFragment extends Fragment {
         }
     }
 
-
-
-
-
     private void sendFilteredAzimuth(Queue<Pair<Short, Short>> values) {
         if (!values.isEmpty())
             channelViewModel.setAzimuth(new LinkedList<>(values));
