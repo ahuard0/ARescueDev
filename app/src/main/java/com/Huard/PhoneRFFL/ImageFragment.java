@@ -11,6 +11,7 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
+import android.media.Image;
 import android.media.ImageReader;
 import android.os.Bundle;
 import android.os.Handler;
@@ -110,7 +111,9 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
 
     @Override
     public void onImageAvailable(ImageReader imageReader) {  /* Necessary for smooth camera updates */
-        imageReader.acquireLatestImage().close();
+        Image mediaImage = imageReader.acquireLatestImage();
+        if (mediaImage != null)
+            mediaImage.close();
     }
 
     @Override
