@@ -42,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
         initializeSimulationFragment();
         initializeFilterFragment();
         initializeTerminalFragment();
+        initializeCorrFragment();
+        initializeCorrSettingsFragment();
     }
 
 
@@ -51,6 +53,18 @@ public class MainActivity extends AppCompatActivity {
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
 
         setContentView(R.layout.activity_main);
+    }
+
+    private void initializeCorrSettingsFragment() {  // Show SimulationFragment
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_corr_settings_container, new CorrectionSettingsFragment())
+                .commit();
+    }
+
+    private void initializeCorrFragment() {  // Show SimulationFragment
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_corr_container, new CorrectionFragment())
+                .commit();
     }
 
     private void initializeFilterFragment() {  // Show SimulationFragment

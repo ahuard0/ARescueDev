@@ -28,8 +28,10 @@ public class SolutionFragment extends Fragment {
     public static final int CHANNEL_DOWN = 4;
     public static final int CHANNEL_LEFT = 1;
     public static final int CHANNEL_RIGHT = 2;
-    private static final double CORR_FACTOR_DELTA_dB_CH34 = -2.21188;
-    private static final double CORR_FACTOR_DELTA_dB_CH12 = -0.96048;
+    private static double CORR_dB_ELEVATION = 0;
+    private static double CORR_dB_AZIMUTH = 0;
+    private static boolean INVERT_AZIMUTH_AOA = false;
+    private static boolean INVERT_ELEVATION_AOA = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -42,6 +44,12 @@ public class SolutionFragment extends Fragment {
 
         lblAzimuth = view.findViewById(R.id.lblAzimuth);
         lblElevation = view.findViewById(R.id.lblElevation);
+
+        CorrectionViewModel correctionViewModel = new ViewModelProvider(requireActivity()).get(CorrectionViewModel.class);
+        correctionViewModel.getInvertAxisAOAAzimuth().observe(getViewLifecycleOwner(), this::receiveInvertAxisAOAAzimuth);
+        correctionViewModel.getInvertAxisAOAElevation().observe(getViewLifecycleOwner(), this::receiveInvertAxisAOAElevation);
+        correctionViewModel.getCorrFactorDeltaDecibelsAzimuth().observe(getViewLifecycleOwner(), this::receiveCorrFactorDeltaDecibelsAzimuth);
+        correctionViewModel.getCorrFactorDeltaDecibelsElevation().observe(getViewLifecycleOwner(), this::receiveCorrFactorDeltaDecibelsElevation);
 
         SideViewModel sideViewModel = new ViewModelProvider(requireActivity()).get(SideViewModel.class);
         sideViewModel.getCentroidAOASelected().observe(getViewLifecycleOwner(), this::receiveShowAOAMode);
@@ -56,6 +64,22 @@ public class SolutionFragment extends Fragment {
         channelViewModel.getElevation().observe(getViewLifecycleOwner(), this::receiveElevationADC);
     }
 
+    private void receiveInvertAxisAOAAzimuth(Boolean value) {
+        INVERT_AZIMUTH_AOA = value;
+    }
+
+    private void receiveInvertAxisAOAElevation(Boolean value) {
+        INVERT_ELEVATION_AOA = value;
+    }
+
+    private void receiveCorrFactorDeltaDecibelsAzimuth(Double value) {
+        CORR_dB_AZIMUTH = value;
+    }
+
+    private void receiveCorrFactorDeltaDecibelsElevation(Double value) {
+        CORR_dB_ELEVATION = value;
+    }
+
     private void receiveAzimuthADC(Queue<Pair<Short, Short>> pairQueue) {
         Queue<Double> solutionQueue = new LinkedList<>();
         for (Pair<Short, Short> values : pairQueue) {
@@ -64,9 +88,9 @@ public class SolutionFragment extends Fragment {
             double delta_dB = Power_CHa - Power_CHb;
 
             // Apply correction factor:  -0.96048 dB  (bottom channel #2 has this additional loss relative to the top channel #1)
-            delta_dB -= CORR_FACTOR_DELTA_dB_CH12;  // When equal power applied through splitter without correction: delta dB = +0.96 dB
+            delta_dB -= CORR_dB_AZIMUTH;  // When equal power applied through splitter without correction: delta dB = +0.96 dB
 
-            double AOA_deg = convert_delta_dB_to_AOA(delta_dB);
+            double AOA_deg = convert_delta_dB_to_AOA(delta_dB, INVERT_AZIMUTH_AOA);
             if (Math.abs(AOA_deg) <= FOV_DEG) {  // Limit AOA to within the Camera FOV
                 Log.d("SolutionFragment", "AOA: " + AOA_deg + "deg Azi, Azimuth: (" + values.first + ", " + values.second + ")");
                 solutionQueue.add(AOA_deg);
@@ -83,9 +107,9 @@ public class SolutionFragment extends Fragment {
             double delta_dB = Power_CHa - Power_CHb;
 
             // Apply correction factor:  -2.21188 dB  (right channel #4 has this additional loss relative to the left channel #3)
-            delta_dB -= CORR_FACTOR_DELTA_dB_CH34;  // When equal power applied through splitter without correction: delta dB = +2.21188 dB
+            delta_dB -= CORR_dB_ELEVATION;  // When equal power applied through splitter without correction: delta dB = +2.21188 dB
 
-            double AOA_deg = convert_delta_dB_to_AOA(delta_dB);
+            double AOA_deg = convert_delta_dB_to_AOA(delta_dB, INVERT_ELEVATION_AOA);
             if (Math.abs(AOA_deg) <= FOV_DEG) {  // Limit AOA to within the Camera FOV
                 Log.d("SolutionFragment", "AOA: " + AOA_deg + "deg El, Elevation: (" + values.first + ", " + values.second + ")");
                 solutionQueue.add(AOA_deg);
@@ -94,10 +118,13 @@ public class SolutionFragment extends Fragment {
         solutionViewModel.setElevationPointsAOA(solutionQueue);
     }
 
-    private double convert_delta_dB_to_AOA(double delta_dB) {
+    private double convert_delta_dB_to_AOA(double delta_dB, boolean invert) {
         // dbm12diff = -0.1462 * AOAResult + 0.0000
         // dbm34diff = -0.1462 * AOAResult + 0.0000
-        return delta_dB/(-0.1462);
+        if (invert)
+            return delta_dB/(0.1462);
+        else
+            return delta_dB/(-0.1462);
     }
 
     private double convert_ADC_to_dBm(int ADC_value, int channel) {

@@ -35,4 +35,11 @@
     <string name="filtered">Filtered</string>
     <string name="filter">Filter</string>
     <string name="logging">Logging</string>
+    <string name="invert_azimuth_axis">Invert Azimuth Axis</string>
+    <string name="invert_elevation_axis">Invert Elevation Axis</string>
+    <string name="elevation_offset_db">Elevation Offset (dB)</string>
+    <string name="azimuth_offset_db">Azimuth Offset (dB)</string>
+    <string name="back">Back</string>
+    <string name="corr">Corr</string>
+    <string name="save">Save</string>
 </resources>
