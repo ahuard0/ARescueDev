@@ -55,8 +55,12 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
     private int bufferIndexElevation = 0; // Index to keep track of the current position in the circular buffer
     private double rollingSumElevation = 0; // Variable to store the sum of the last 10 values
     private double rollingCentroidAOAElevation = 0;
-    final float fx = (float) MainActivity.screenWidth; // for matrix transformation
-    final float fy = -fx; // for matrix transformation
+    public final float fx = (float) MainActivity.screenWidth; // for matrix transformation
+    public final float fy = -fx; // for matrix transformation
+    private boolean enableParallaxCorrection = false;
+    private double estimatedDistanceToEmitter = 1.0;
+    private double cameraOffsetX = 0.0;
+    private double cameraOffsetY = 0.0;
 
     public ImageFragment() {
         canvas = new Canvas(bitmap);
@@ -106,6 +110,12 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
         solutionViewModel.getAzimuthPointsAOA().observe(getViewLifecycleOwner(), this::receiveAzimuthPointAOA);
         solutionViewModel.getElevationPointsAOA().observe(getViewLifecycleOwner(), this::receiveElevationPointAOA);
 
+        CorrectionViewModel correctionViewModel = new ViewModelProvider(requireActivity()).get(CorrectionViewModel.class);
+        correctionViewModel.getEnableParallaxCorrection().observe(getViewLifecycleOwner(), this::receiveEnableParallaxCorrection);
+        correctionViewModel.getEstimatedDistanceToEmitter().observe(getViewLifecycleOwner(), this::receiveEstimatedDistanceToEmitter);
+        correctionViewModel.getCameraOffsetX().observe(getViewLifecycleOwner(), this::receiveCameraOffsetX);
+        correctionViewModel.getCameraOffsetY().observe(getViewLifecycleOwner(), this::receiveCameraOffsetY);
+
         storageManager = new StorageManager(mContext);
     }
 
@@ -130,6 +140,22 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
     private void receiveLoggingExportCommand(Boolean value) {
         Log.d("ImageFragment", "Exporting Log Telemetry Data");
         storageManager.exportTelemetryData();
+    }
+
+    private void receiveCameraOffsetX(double value) {
+        this.cameraOffsetX = value;
+    }
+
+    private void receiveCameraOffsetY(double value) {
+        this.cameraOffsetY = value;
+    }
+
+    private void receiveEstimatedDistanceToEmitter(double value) {
+        this.estimatedDistanceToEmitter = value;
+    }
+
+    private void receiveEnableParallaxCorrection(boolean isEnabled) {
+        this.enableParallaxCorrection = isEnabled;
     }
 
     private void receiveIsConnected(boolean isConnected) {
@@ -321,12 +347,24 @@ public class ImageFragment extends Fragment implements ImageReader.OnImageAvaila
     }
 
     private int convertAngleToPixels(PointAOA pointAOA) {
-        if (pointAOA.getType() == PointAOA.Type.AZIMUTH) {
-            return ((int) (fx * Math.tan(Math.PI * pointAOA.getValue() / 180))) + MainActivity.screenWidth / 2;
-        } else if (pointAOA.getType() == PointAOA.Type.ELEVATION) {
-            return ((int) (fy * Math.tan(Math.PI * pointAOA.getValue() / 180))) + MainActivity.screenHeight / 2;
+        if (enableParallaxCorrection) {
+            // Parallax Correction: u = Cx + fx * (tan(AOAx)- hx/d), v = Cv + fy * (tan(AOAy)- hy/d)
+            if (pointAOA.getType() == PointAOA.Type.AZIMUTH) {
+                return ((int) (fx * (Math.tan(Math.PI * pointAOA.getValue() / 180) - (cameraOffsetX / estimatedDistanceToEmitter)))) + MainActivity.screenWidth / 2;
+            } else if (pointAOA.getType() == PointAOA.Type.ELEVATION) {
+                return ((int) (fy * (Math.tan(Math.PI * pointAOA.getValue() / 180) - (cameraOffsetY / estimatedDistanceToEmitter)))) + MainActivity.screenHeight / 2;
+            } else {
+                throw new IllegalArgumentException("Unsupported PointAOA type: " + pointAOA.getType());
+            }
         } else {
-            throw new IllegalArgumentException("Unsupported PointAOA type: " + pointAOA.getType());
+            // Original Algorithm, No Parallax Correction
+            if (pointAOA.getType() == PointAOA.Type.AZIMUTH) {
+                return ((int) (fx * Math.tan(Math.PI * pointAOA.getValue() / 180))) + MainActivity.screenWidth / 2;
+            } else if (pointAOA.getType() == PointAOA.Type.ELEVATION) {
+                return ((int) (fy * Math.tan(Math.PI * pointAOA.getValue() / 180))) + MainActivity.screenHeight / 2;
+            } else {
+                throw new IllegalArgumentException("Unsupported PointAOA type: " + pointAOA.getType());
+            }
         }
     }
 

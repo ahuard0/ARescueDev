@@ -14,7 +14,7 @@
             android:id="@+id/lblTerminal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="675dp"
+            android:layout_marginEnd="700dp"
             android:layout_marginBottom="4dp"
             android:text="@string/terminal"
             android:textAlignment="viewStart"

@@ -26,7 +26,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="4dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -38,7 +38,25 @@
 
                 <EditText
                     android:id="@+id/corr_factors_txtOffsetAzimuth"
-                    android:layout_width="match_parent"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:backgroundTint="@android:color/white"
+                    android:autofillHints="Enter an azimuth delta dB offset value."
+                    tools:ignore="LabelFor" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/elevation_offset_db"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:layout_marginStart="25dp"
+                    android:layout_marginEnd="8dp"/>
+
+                <EditText
+                    android:id="@+id/corr_factors_txtOffsetElevation"
+                    android:layout_width="150dp"
                     android:layout_height="wrap_content"
                     android:inputType="numberDecimal|numberSigned"
                     android:backgroundTint="@android:color/white"
@@ -50,31 +68,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="4dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/elevation_offset_db"
-                    android:textColor="#FFFFFF"
-                    android:textSize="16sp"
-                    android:layout_marginEnd="8dp"/>
 
-                <EditText
-                    android:id="@+id/corr_factors_txtOffsetElevation"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"
-                    android:backgroundTint="@android:color/white"
-                    android:autofillHints="Enter an azimuth delta dB offset value."
-                    tools:ignore="LabelFor" />
             </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="4dp">
 
             <CheckBox
                 android:id="@+id/corr_factors_chkInvertAzimuth"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginEnd="15dp"
                 android:text="@string/invert_azimuth_axis"
                 android:textColor="#FFFFFF" />
 
@@ -84,6 +93,87 @@
                 android:layout_height="wrap_content"
                 android:text="@string/invert_elevation_axis"
                 android:textColor="#FFFFFF" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="4dp">
+
+                <CheckBox
+                    android:id="@+id/corr_factors_chkEnableParallax"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/enable_parallax_correction"
+                    android:textColor="#FFFFFF" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/estimated_distance_inch"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:layout_marginStart="50dp"
+                    android:layout_marginEnd="8dp"/>
+
+                <EditText
+                    android:id="@+id/corr_factors_txtEstimatedDistance"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:backgroundTint="@android:color/white"
+                    android:autofillHints="Enter an azimuth delta dB offset value."
+                    tools:ignore="LabelFor" />
+
+            </LinearLayout>
+
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/camera_x_offset_inch"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="8dp"/>
+
+                <EditText
+                    android:id="@+id/corr_factors_txtCameraOffsetX"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:backgroundTint="@android:color/white"
+                    android:autofillHints="Enter an azimuth delta dB offset value."
+                    tools:ignore="LabelFor" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/camera_y_offset_inch"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="8dp"/>
+
+                <EditText
+                    android:id="@+id/corr_factors_txtCameraOffsetY"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:backgroundTint="@android:color/white"
+                    android:autofillHints="Enter an azimuth delta dB offset value."
+                    tools:ignore="LabelFor" />
+
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"

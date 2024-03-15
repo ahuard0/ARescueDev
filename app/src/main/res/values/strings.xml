@@ -42,4 +42,8 @@
     <string name="back">Back</string>
     <string name="corr">Corr</string>
     <string name="save">Save</string>
+    <string name="enable_parallax_correction">Enable Parallax Correction</string>
+    <string name="estimated_distance_inch">Estimated Distance (inch)</string>
+    <string name="camera_x_offset_inch">Camera x-Offset (inch)</string>
+    <string name="camera_y_offset_inch">Camera y-Offset (inch)</string>
 </resources>

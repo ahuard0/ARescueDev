@@ -5,4 +5,8 @@ public class CorrectionSettings {
     public boolean invertElevation;
     public double corrAzimuth;
     public double corrElevation;
+    public boolean enableParallax;
+    public double distanceToEmitter;
+    public double cameraOffsetX;
+    public double cameraOffsetY;
 }

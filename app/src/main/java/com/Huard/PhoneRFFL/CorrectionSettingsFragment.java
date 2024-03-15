@@ -25,6 +25,12 @@ public class CorrectionSettingsFragment extends Fragment {
     private EditText editTxtOffsetElevation;
     private CheckBox chkInvertAzimuth;
     private CheckBox chkInvertElevation;
+    private CheckBox chkEnableParallaxCorrection;
+    private EditText txtEstimatedDistanceToEmitter;
+    private EditText txtCameraOffsetX;
+    private EditText txtCameraOffsetY;
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_correction_settings, container, false);  // Inflate the layout for this fragment
@@ -46,8 +52,13 @@ public class CorrectionSettingsFragment extends Fragment {
         chkInvertAzimuth = view.findViewById(R.id.corr_factors_chkInvertAzimuth);
         chkInvertElevation = view.findViewById(R.id.corr_factors_chkInvertElevation);
 
-        correctionViewModel = new ViewModelProvider(requireActivity()).get(CorrectionViewModel.class);
 
+        chkEnableParallaxCorrection = view.findViewById(R.id.corr_factors_chkEnableParallax);
+        txtEstimatedDistanceToEmitter = view.findViewById(R.id.corr_factors_txtEstimatedDistance);
+        txtCameraOffsetX = view.findViewById(R.id.corr_factors_txtCameraOffsetX);
+        txtCameraOffsetY = view.findViewById(R.id.corr_factors_txtCameraOffsetY);
+
+        correctionViewModel = new ViewModelProvider(requireActivity()).get(CorrectionViewModel.class);
         correctionViewModel.getShowCorrectionSettings().observe(getViewLifecycleOwner(), this::ShowCorrectionSettings);
 
         correctionStorage = new CorrectionStorage(requireContext());
@@ -76,6 +87,22 @@ public class CorrectionSettingsFragment extends Fragment {
             editTxtOffsetAzimuth.setText(corrAzimuth.toString());
         if (corrElevation != null)
             editTxtOffsetElevation.setText(corrElevation.toString());
+
+        // populate settings: parallax
+        boolean enableParallax = Boolean.TRUE.equals(correctionViewModel.enableParallaxCorrection.getValue());
+        chkEnableParallaxCorrection.setChecked(enableParallax);
+
+        Double estDistance = correctionViewModel.estimatedDistanceToEmitter.getValue();
+        Double offsetX = correctionViewModel.cameraOffsetX.getValue();
+        Double offsetY = correctionViewModel.cameraOffsetY.getValue();
+
+        if (estDistance != null)
+            txtEstimatedDistanceToEmitter.setText(estDistance.toString());
+        if (offsetX != null)
+            txtCameraOffsetX.setText(offsetX.toString());
+        if (offsetY != null)
+            txtCameraOffsetY.setText(offsetY.toString());
+
     }
 
     private void onPressBack() {
@@ -95,11 +122,19 @@ public class CorrectionSettingsFragment extends Fragment {
             chkInvertAzimuth.setChecked(settings.invertElevation);
             editTxtOffsetAzimuth.setText(String.format(Locale.getDefault(), "%.4f\n", settings.corrAzimuth));
             editTxtOffsetElevation.setText(String.format(Locale.getDefault(), "%.4f\n", settings.corrElevation));
+            chkEnableParallaxCorrection.setChecked(settings.enableParallax);
+            txtEstimatedDistanceToEmitter.setText(String.format(Locale.getDefault(), "%.4f\n", settings.distanceToEmitter));
+            txtCameraOffsetX.setText(String.format(Locale.getDefault(), "%.4f\n", settings.cameraOffsetX));
+            txtCameraOffsetY.setText(String.format(Locale.getDefault(), "%.4f\n", settings.cameraOffsetY));
 
             correctionViewModel.setInvertAxisAOAAzimuth(settings.invertAzimuth);
             correctionViewModel.setInvertAxisAOAElevation(settings.invertElevation);
             correctionViewModel.setCorrFactorDeltaDecibelsAzimuth(settings.corrAzimuth);
             correctionViewModel.setCorrFactorDeltaDecibelsElevation(settings.corrElevation);
+            correctionViewModel.setEnableParallaxCorrection(settings.enableParallax);
+            correctionViewModel.setEstimatedDistanceToEmitter(settings.distanceToEmitter);
+            correctionViewModel.setCameraOffsetX(settings.cameraOffsetX);
+            correctionViewModel.setCameraOffsetY(settings.cameraOffsetY);
         }
     }
 
@@ -123,24 +158,54 @@ public class CorrectionSettingsFragment extends Fragment {
             offsetElevation = Double.parseDouble(offsetElevationStr);
             correctionViewModel.setCorrFactorDeltaDecibelsElevation(offsetElevation);
         }
+
+        boolean enableParallax = chkEnableParallaxCorrection.isChecked();
+        correctionViewModel.setEnableParallaxCorrection(enableParallax);
+
+        String distanceToEmitterStr = String.valueOf(txtEstimatedDistanceToEmitter.getText());
+        String offsetXStr= String.valueOf(txtCameraOffsetX.getText());
+        String offsetYStr = String.valueOf(txtCameraOffsetY.getText());
+
+        double distanceToEmitter;
+        double offsetX;
+        double offsetY;
+        if (!distanceToEmitterStr.isEmpty() && !offsetXStr.isEmpty() && !offsetYStr.isEmpty()) {
+            distanceToEmitter = Double.parseDouble(distanceToEmitterStr);
+            offsetX = Double.parseDouble(offsetXStr);
+            offsetY = Double.parseDouble(offsetYStr);
+            correctionViewModel.setEstimatedDistanceToEmitter(distanceToEmitter);
+            correctionViewModel.setCameraOffsetX(offsetX);
+            correctionViewModel.setCameraOffsetY(offsetY);
+        }
     }
 
     private void SaveSettingsToStorage() {
         boolean invertAzimuth = chkInvertAzimuth.isChecked();
         boolean invertElevation = chkInvertElevation.isChecked();
+        boolean enableParallax = chkEnableParallaxCorrection.isChecked();
 
         String offsetAzimuthStr = String.valueOf(editTxtOffsetAzimuth.getText());
         String offsetElevationStr = String.valueOf(editTxtOffsetElevation.getText());
+        String distanceToEmitterStr = String.valueOf(txtEstimatedDistanceToEmitter.getText());
+        String offsetXStr= String.valueOf(txtCameraOffsetX.getText());
+        String offsetYStr = String.valueOf(txtCameraOffsetY.getText());
 
-        if (!offsetAzimuthStr.isEmpty() && !offsetElevationStr.isEmpty()) {
+        if (!offsetAzimuthStr.isEmpty() && !offsetElevationStr.isEmpty() && !distanceToEmitterStr.isEmpty() && !offsetXStr.isEmpty() && !offsetYStr.isEmpty()) {
             double offsetAzimuth = Double.parseDouble(offsetAzimuthStr);
             double offsetElevation = Double.parseDouble(offsetElevationStr);
+            double distanceToEmitter = Double.parseDouble(distanceToEmitterStr);
+            double offsetX = Double.parseDouble(offsetXStr);
+            double offsetY = Double.parseDouble(offsetYStr);
 
             CorrectionSettings settings = new CorrectionSettings();
             settings.corrAzimuth = offsetAzimuth;
             settings.corrElevation = offsetElevation;
             settings.invertAzimuth = invertAzimuth;
             settings.invertElevation = invertElevation;
+            settings.enableParallax = enableParallax;
+            settings.distanceToEmitter = distanceToEmitter;
+            settings.cameraOffsetX = offsetX;
+            settings.cameraOffsetY = offsetY;
             correctionStorage.Save(settings);
         }
     }

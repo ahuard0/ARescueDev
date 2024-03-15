@@ -23,13 +23,13 @@ public class CorrectionStorage {
         mContext = context;
     }
 
-    public void Save(boolean invertAzimuth, boolean invertElevation, double corrAzimuth, double corrElevation) {
-        String data = String.format(Locale.getDefault(), "%b,%b,%.4f,%.4f\n", invertAzimuth, invertElevation, corrAzimuth, corrElevation);
+    public void Save(boolean invertAzimuth, boolean invertElevation, double corrAzimuth, double corrElevation, boolean enableParallax, double estimatedDistance, double cameraOffsetX, double cameraOffsetY) {
+        String data = String.format(Locale.getDefault(), "%b,%b,%.4f,%.4f,%b,%.4f,%.4f,%.4f\n", invertAzimuth, invertElevation, corrAzimuth, corrElevation, enableParallax, estimatedDistance, cameraOffsetX, cameraOffsetY);
         saveDataToExternalStorage(data);
     }
 
     public void Save(CorrectionSettings settings) {
-        this.Save(settings.invertAzimuth, settings.invertElevation, settings.corrAzimuth, settings.corrElevation);
+        this.Save(settings.invertAzimuth, settings.invertElevation, settings.corrAzimuth, settings.corrElevation, settings.enableParallax, settings.distanceToEmitter, settings.cameraOffsetX, settings.cameraOffsetY);
     }
 
     public CorrectionSettings Load() {
@@ -41,11 +41,15 @@ public class CorrectionStorage {
 
         String[] parts = loadedData.split(",");
         CorrectionSettings result = new CorrectionSettings();
-        if (parts.length == 4) {
+        if (parts.length == 8) {
             result.invertAzimuth = Boolean.parseBoolean(parts[0]);
             result.invertElevation = Boolean.parseBoolean(parts[1]);
             result.corrAzimuth = Double.parseDouble(parts[2]);
             result.corrElevation = Double.parseDouble(parts[3]);
+            result.enableParallax = Boolean.parseBoolean(parts[4]);
+            result.distanceToEmitter = Double.parseDouble(parts[5]);
+            result.cameraOffsetX = Double.parseDouble(parts[6]);
+            result.cameraOffsetY = Double.parseDouble(parts[7]);
             return result;
         } else {
             Log.e("CorrectionStorage", "Failed to parse saved correction settings file data.");
