@@ -10,6 +10,7 @@ public class ConnectionViewModel extends ViewModel {
     private final MutableLiveData<Boolean> isConnected = new MutableLiveData<>();
     private final MutableLiveData<String> connectionStatus = new MutableLiveData<>();
     private final MutableLiveData<Queue<String>> terminalMsg = new MutableLiveData<>();
+    private final MutableLiveData<String> command = new MutableLiveData<>();
 
     public void setTerminalMsg(Queue<String> value) {
         terminalMsg.postValue(value);
@@ -36,4 +37,11 @@ public class ConnectionViewModel extends ViewModel {
         return connectionStatus;
     }
 
+    public void setCommand(String value) {
+        command.postValue(value);
+    }
+
+    public LiveData<String> getCommand() {
+        return command;
+    }
 }

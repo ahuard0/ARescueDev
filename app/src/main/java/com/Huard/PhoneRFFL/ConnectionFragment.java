@@ -39,6 +39,7 @@ public class ConnectionFragment extends Fragment {
         setConnectionStatusIndicator(false);  // initialize status indicator
 
         connectionViewModel = new ViewModelProvider(requireActivity()).get(ConnectionViewModel.class);
+        connectionViewModel.getCommand().observe(getViewLifecycleOwner(), this::receiveCommand);
 
         connectionManager = new ConnectionManager(requireActivity(), statusTerminalHandler, statusConnectionHandler);
         connectionManager.connect();
@@ -89,6 +90,10 @@ public class ConnectionFragment extends Fragment {
         } else {
             connectionStatusIndicator.setBackgroundResource(R.drawable.connection_status_circle_red);
         }
+    }
+
+    private void receiveCommand(String cmd) {  // write string to the USB bus
+        connectionManager.client.write(cmd);
     }
 
     @Override

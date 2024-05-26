@@ -16,13 +16,16 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Queue;
 
 public class SolutionFragment extends Fragment {
 
+    private boolean IsHapticsEnabled = false;
     private TextView lblAzimuth;
     private TextView lblElevation;
     private SolutionViewModel solutionViewModel;
+    private ConnectionViewModel connectionViewModel;
     private static final double FOV_DEG = 77;
     public static final int CHANNEL_UP = 3;
     public static final int CHANNEL_DOWN = 4;
@@ -32,6 +35,10 @@ public class SolutionFragment extends Fragment {
     private static double CORR_dB_AZIMUTH = 0;
     private static boolean INVERT_AZIMUTH_AOA = false;
     private static boolean INVERT_ELEVATION_AOA = false;
+    public static final int HAPTICS_CHANNEL_UP = 4;  // D4
+    public static final int HAPTICS_CHANNEL_DOWN = 3;  // D3
+    public static final int HAPTICS_CHANNEL_LEFT = 6;  // D6
+    public static final int HAPTICS_CHANNEL_RIGHT = 5;  // D5
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -58,6 +65,8 @@ public class SolutionFragment extends Fragment {
         solutionViewModel = new ViewModelProvider(requireActivity()).get(SolutionViewModel.class);
         solutionViewModel.getCentroidAOAAzimuth().observe(getViewLifecycleOwner(), this::receiveCentroidAOAAzimuth);
         solutionViewModel.getCentroidAOAElevation().observe(getViewLifecycleOwner(), this::receiveCentroidAOAElevation);
+
+        connectionViewModel = new ViewModelProvider(requireActivity()).get(ConnectionViewModel.class);
 
         ChannelViewModel channelViewModel = new ViewModelProvider(requireActivity()).get(ChannelViewModel.class);
         channelViewModel.getAzimuth().observe(getViewLifecycleOwner(), this::receiveAzimuthADC);
@@ -97,6 +106,7 @@ public class SolutionFragment extends Fragment {
             }
         }
         solutionViewModel.setAzimuthPointsAOA(solutionQueue);
+        sendHapticsAzimuth(solutionQueue);
     }
 
     private void receiveElevationADC(Queue<Pair<Short, Short>> pairQueue) {
@@ -116,6 +126,7 @@ public class SolutionFragment extends Fragment {
             }
         }
         solutionViewModel.setElevationPointsAOA(solutionQueue);
+        sendHapticsElevation(solutionQueue);
     }
 
     private double convert_delta_dB_to_AOA(double delta_dB, boolean invert) {
@@ -168,11 +179,6 @@ public class SolutionFragment extends Fragment {
         }
     }
 
-    /** @noinspection EmptyMethod, unused */
-    private void receiveHapticsMode(boolean isHapticsSelected) {
-        // TODO: Implement Haptics Cues
-    }
-
     public void setAOASolutionAzimuthText(double value) {
         @SuppressLint("DefaultLocale") String text = String.format("%.1f°<sup><small>Az</small></sup>", value);
         lblAzimuth.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT));
@@ -183,4 +189,72 @@ public class SolutionFragment extends Fragment {
         lblElevation.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT));
     }
 
+    private void receiveHapticsMode(boolean isHapticsSelected) {
+        IsHapticsEnabled = isHapticsSelected;
+
+        if (!IsHapticsEnabled) {
+            sendCommand(String.format(Locale.US, "$|_D%d_OFF\n", HAPTICS_CHANNEL_UP));
+            sendCommand(String.format(Locale.US, "$|_D%d_OFF\n", HAPTICS_CHANNEL_DOWN));
+            sendCommand(String.format(Locale.US, "$|_D%d_OFF\n", HAPTICS_CHANNEL_LEFT));
+            sendCommand(String.format(Locale.US, "$|_D%d_OFF\n", HAPTICS_CHANNEL_RIGHT));
+        }
+    }
+
+    private void sendHapticsAzimuth(Queue<Double> solutionQueue) {
+        if (IsHapticsEnabled) {
+            int positiveCount = 0;
+            int negativeCount = 0;
+
+            for (Double item : solutionQueue) {
+                if (item > 0) {
+                    positiveCount += 1;
+                } else if (item < 0) {
+                    negativeCount += 1;
+                }
+            }
+
+            // Determine the Haptics Direction
+            if (positiveCount > negativeCount) {  // Is Right
+                sendCommand(String.format(Locale.US, "$|_D%d_OFF\n", HAPTICS_CHANNEL_LEFT));
+                sendCommand(String.format(Locale.US, "$|_D%d_ON\n", HAPTICS_CHANNEL_RIGHT));
+            } else if (negativeCount > positiveCount) {  // Is Left
+                sendCommand(String.format(Locale.US, "$|_D%d_ON\n", HAPTICS_CHANNEL_LEFT));
+                sendCommand(String.format(Locale.US, "$|_D%d_OFF\n", HAPTICS_CHANNEL_RIGHT));
+            } else {  // Is Either Right or Left
+                sendCommand(String.format(Locale.US, "$|_D%d_ON\n", HAPTICS_CHANNEL_LEFT));
+                sendCommand(String.format(Locale.US, "$|_D%d_ON\n", HAPTICS_CHANNEL_RIGHT));
+            }
+        }
+    }
+
+    private void sendHapticsElevation(Queue<Double> solutionQueue) {
+        if (IsHapticsEnabled) {
+            int positiveCount = 0;
+            int negativeCount = 0;
+
+            for (Double item : solutionQueue) {
+                if (item > 0) {
+                    positiveCount += 1;
+                } else if (item < 0) {
+                    negativeCount += 1;
+                }
+            }
+
+            // Determine the Haptics Direction
+            if (positiveCount > negativeCount) {  // Is Up
+                sendCommand(String.format(Locale.US, "$|_D%d_ON\n", HAPTICS_CHANNEL_UP));
+                sendCommand(String.format(Locale.US, "$|_D%d_OFF\n", HAPTICS_CHANNEL_DOWN));
+            } else if (negativeCount > positiveCount) {  // Is Down
+                sendCommand(String.format(Locale.US, "$|_D%d_OFF\n", HAPTICS_CHANNEL_UP));
+                sendCommand(String.format(Locale.US, "$|_D%d_ON\n", HAPTICS_CHANNEL_DOWN));
+            } else {  // Is Either Up or Down
+                sendCommand(String.format(Locale.US, "$|_D%d_ON\n", HAPTICS_CHANNEL_UP));
+                sendCommand(String.format(Locale.US, "$|_D%d_ON\n", HAPTICS_CHANNEL_DOWN));
+            }
+        }
+    }
+
+    private void sendCommand(String command) {
+        connectionViewModel.setCommand(command);
+    }
 }
