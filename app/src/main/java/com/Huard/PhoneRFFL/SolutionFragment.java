@@ -27,10 +27,10 @@ public class SolutionFragment extends Fragment {
     private SolutionViewModel solutionViewModel;
     private ConnectionViewModel connectionViewModel;
     private static final double FOV_DEG = 77;
-    public static final int CHANNEL_UP = 3;
-    public static final int CHANNEL_DOWN = 4;
-    public static final int CHANNEL_LEFT = 1;
-    public static final int CHANNEL_RIGHT = 2;
+    public static final int CHANNEL_UP = 1;    // was 3 (switching elevation known good to azimuth)
+    public static final int CHANNEL_DOWN = 2;  // was 4 (switching elevation known good to azimuth)
+    public static final int CHANNEL_LEFT = 3;  // was 1 (switching azi/elevation due to azi issue)
+    public static final int CHANNEL_RIGHT = 4; // was 2 (switching azi/elevation due to azi issue)
     private static double CORR_dB_ELEVATION = 0;
     private static double CORR_dB_AZIMUTH = 0;
     private static boolean INVERT_AZIMUTH_AOA = false;
