@@ -46,4 +46,10 @@
     <string name="estimated_distance_inch">Estimated Distance (inch)</string>
     <string name="camera_x_offset_inch">Camera x-Offset (inch)</string>
     <string name="camera_y_offset_inch">Camera y-Offset (inch)</string>
+    <string name="config_iq">Config DAQ</string>
+    <string name="connect_daq">Connect DAQ</string>
+    <string name="frequency_mhz">Frequency (MHz)</string>
+    <string name="ip_address">IP Address</string>
+    <string name="default_ip_addr">192.168.1.10</string>
+    <string name="_2409">2409</string>
 </resources>

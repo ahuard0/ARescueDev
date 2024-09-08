@@ -14,7 +14,6 @@ public class MainActivity extends AppCompatActivity {
     static final int screenWidth = 2400;
     static final int screenHeight = 1080;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
         initializeCorrFragment();
         initializeCorrSettingsFragment();
     }
-
 
     private void initializeWindow() {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -114,4 +112,5 @@ public class MainActivity extends AppCompatActivity {
                 .replace(R.id.fragment_terminal_container, new TerminalFragment())
                 .commit();
     }
+
 }

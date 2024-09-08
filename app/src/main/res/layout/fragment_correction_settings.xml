@@ -28,22 +28,88 @@
                 android:orientation="horizontal"
                 android:layout_marginBottom="4dp">
 
+                <Button
+                    android:id="@+id/corr_settings_btnConfigDAQ"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="#BB36F4"
+                    android:paddingStart="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="8dp"
+                    android:text="@string/config_iq"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    tools:ignore="VisualLintButtonSize" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ip_address"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:layout_marginStart="25dp"
+                    android:layout_marginEnd="8dp"
+                    tools:ignore="VisualLintBounds" />
+
+                <EditText
+                    android:id="@+id/corr_settings_txtIPAddress"
+                    android:layout_width="185dp"
+                    android:layout_marginEnd="25dp"
+                    android:text="@string/default_ip_addr"
+                    android:textColor="#FFFFFF"
+                    android:layout_height="wrap_content"
+                    android:autofillHints="Enter an azimuth delta dB offset value."
+                    android:backgroundTint="@android:color/white"
+                    android:inputType="textNoSuggestions"
+                    tools:ignore="LabelFor,SpeakableTextPresentCheck,TouchTargetSizeCheck,VisualLintBounds" />
+
+                <Button
+                    android:id="@+id/corr_settings_btnConnectDAQ"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="150dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="#009688"
+                    android:paddingStart="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="8dp"
+                    android:text="@string/connect_daq"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    tools:ignore="VisualLintButtonSize" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="4dp">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/azimuth_offset_db"
                     android:textColor="#FFFFFF"
                     android:textSize="16sp"
+                    android:layout_marginStart="8dp"
                     android:layout_marginEnd="8dp"/>
 
                 <EditText
                     android:id="@+id/corr_factors_txtOffsetAzimuth"
                     android:layout_width="150dp"
+                    android:textColor="#FFFFFF"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"
-                    android:backgroundTint="@android:color/white"
                     android:autofillHints="Enter an azimuth delta dB offset value."
-                    tools:ignore="LabelFor" />
+                    android:backgroundTint="@android:color/white"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:visibility="visible"
+                    tools:ignore="LabelFor,TouchTargetSizeCheck,SpeakableTextPresentCheck" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -52,16 +118,18 @@
                     android:textColor="#FFFFFF"
                     android:textSize="16sp"
                     android:layout_marginStart="25dp"
-                    android:layout_marginEnd="8dp"/>
+                    android:layout_marginEnd="8dp"
+                    tools:ignore="VisualLintBounds" />
 
                 <EditText
                     android:id="@+id/corr_factors_txtOffsetElevation"
-                    android:layout_width="150dp"
+                    android:layout_width="185dp"
+                    android:textColor="#FFFFFF"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"
-                    android:backgroundTint="@android:color/white"
                     android:autofillHints="Enter an azimuth delta dB offset value."
-                    tools:ignore="LabelFor" />
+                    android:backgroundTint="@android:color/white"
+                    android:inputType="numberDecimal|numberSigned"
+                    tools:ignore="LabelFor,SpeakableTextPresentCheck,TouchTargetSizeCheck,VisualLintBounds" />
             </LinearLayout>
 
             <LinearLayout
@@ -70,29 +138,43 @@
                 android:orientation="horizontal"
                 android:layout_marginBottom="4dp">
 
+                <CheckBox
+                    android:id="@+id/corr_factors_chkInvertAzimuth"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="15dp"
+                    android:text="@string/invert_azimuth_axis"
+                    android:textColor="#FFFFFF"
+                    tools:ignore="VisualLintBounds" />
 
-            </LinearLayout>
+                <CheckBox
+                    android:id="@+id/corr_factors_chkInvertElevation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/invert_elevation_axis"
+                    android:textColor="#FFFFFF"
+                    tools:ignore="VisualLintBounds" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="4dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/frequency_mhz"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:layout_marginStart="25dp"
+                    android:layout_marginEnd="8dp"
+                    tools:ignore="VisualLintBounds" />
 
-            <CheckBox
-                android:id="@+id/corr_factors_chkInvertAzimuth"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="15dp"
-                android:text="@string/invert_azimuth_axis"
-                android:textColor="#FFFFFF" />
-
-            <CheckBox
-                android:id="@+id/corr_factors_chkInvertElevation"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/invert_elevation_axis"
-                android:textColor="#FFFFFF" />
+                <EditText
+                    android:id="@+id/corr_settings_txtFreq"
+                    android:layout_width="180dp"
+                    android:text="@string/_2409"
+                    android:textColor="#FFFFFF"
+                    android:layout_height="wrap_content"
+                    android:autofillHints="Enter DAQ Center Frequency."
+                    android:backgroundTint="@android:color/white"
+                    android:inputType="numberDecimal"
+                    tools:ignore="LabelFor,SpeakableTextPresentCheck,TouchTargetSizeCheck,VisualLintBounds" />
 
             </LinearLayout>
 
@@ -107,7 +189,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/enable_parallax_correction"
-                    android:textColor="#FFFFFF" />
+                    android:textColor="#FFFFFF"
+                    tools:ignore="VisualLintBounds" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -116,16 +199,18 @@
                     android:textColor="#FFFFFF"
                     android:textSize="16sp"
                     android:layout_marginStart="50dp"
-                    android:layout_marginEnd="8dp"/>
+                    android:layout_marginEnd="8dp"
+                    tools:ignore="VisualLintBounds" />
 
                 <EditText
                     android:id="@+id/corr_factors_txtEstimatedDistance"
                     android:layout_width="150dp"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"
-                    android:backgroundTint="@android:color/white"
+                    android:textColor="#FFFFFF"
                     android:autofillHints="Enter an azimuth delta dB offset value."
-                    tools:ignore="LabelFor" />
+                    android:backgroundTint="@android:color/white"
+                    android:inputType="numberDecimal|numberSigned"
+                    tools:ignore="LabelFor,SpeakableTextPresentCheck,TouchTargetSizeCheck,VisualLintBounds" />
 
             </LinearLayout>
 
@@ -150,10 +235,11 @@
                     android:id="@+id/corr_factors_txtCameraOffsetX"
                     android:layout_width="150dp"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"
-                    android:backgroundTint="@android:color/white"
+                    android:textColor="#FFFFFF"
                     android:autofillHints="Enter an azimuth delta dB offset value."
-                    tools:ignore="LabelFor" />
+                    android:backgroundTint="@android:color/white"
+                    android:inputType="numberDecimal|numberSigned"
+                    tools:ignore="LabelFor,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -162,16 +248,18 @@
                     android:textColor="#FFFFFF"
                     android:textSize="16sp"
                     android:layout_marginStart="16dp"
-                    android:layout_marginEnd="8dp"/>
+                    android:layout_marginEnd="8dp"
+                    tools:ignore="VisualLintBounds" />
 
                 <EditText
                     android:id="@+id/corr_factors_txtCameraOffsetY"
                     android:layout_width="150dp"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"
-                    android:backgroundTint="@android:color/white"
+                    android:textColor="#FFFFFF"
                     android:autofillHints="Enter an azimuth delta dB offset value."
-                    tools:ignore="LabelFor" />
+                    android:backgroundTint="@android:color/white"
+                    android:inputType="numberDecimal|numberSigned"
+                    tools:ignore="LabelFor,SpeakableTextPresentCheck,TouchTargetSizeCheck,VisualLintBounds" />
 
             </LinearLayout>
 
@@ -187,7 +275,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="8dp"
-                    android:layout_marginEnd="350dp"
+                    android:layout_marginEnd="0dp"
                     android:layout_weight="1"
                     android:backgroundTint="#135516"
                     android:paddingStart="16dp"
@@ -198,7 +286,27 @@
                     android:textColor="#FFFFFF"
                     android:textSize="20sp"
                     android:textStyle="bold"
-                    style="?android:attr/buttonBarButtonStyle" />
+                    tools:ignore="VisualLintButtonSize,VisualLintBounds" />
+
+                <Space
+                    android:layout_width="20dp"
+                    android:layout_height="0dp" />
+
+                <TextView
+                    android:id="@+id/corr_settings_txtStatusDAQ"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:maxLines="3"
+                    android:textColor="#FFFFFF"
+                    android:text="@string/not_connected"
+                    android:textAlignment="center"
+                    android:textStyle="bold"
+                    tools:ignore="VisualLintBounds" />
+
+                <Space
+                    android:layout_width="20dp"
+                    android:layout_height="0dp" />
 
                 <Button
                     android:id="@+id/corr_factors_btnBack"
@@ -217,7 +325,7 @@
                     android:layout_marginStart="8dp"
                     android:layout_marginEnd="150dp"
                     android:layout_marginTop="8dp"
-                    style="?android:attr/buttonBarButtonStyle" />
+                    tools:ignore="VisualLintButtonSize,VisualLintBounds" />
 
             </LinearLayout>
 

@@ -9,4 +9,6 @@ public class CorrectionSettings {
     public double distanceToEmitter;
     public double cameraOffsetX;
     public double cameraOffsetY;
+    public String ip_address_daq;
+    public double frequency_mhz;
 }
